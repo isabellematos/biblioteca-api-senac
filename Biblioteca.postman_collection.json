@@ -1,0 +1,339 @@
+{
+	"info": {
+		"name": "Biblioteca API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "API Keys",
+			"item": [
+				{
+					"name": "Gerar API Key",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"descricao\": \"Chave de teste\"\n}"
+						},
+						"url": { "raw": "http://localhost:8080/api/v1/api-keys", "host": ["http://localhost:8080"], "path": ["api", "v1", "api-keys"] }
+					}
+				},
+				{
+					"name": "Listar API Keys",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "http://localhost:8080/api/v1/api-keys", "host": ["http://localhost:8080"], "path": ["api", "v1", "api-keys"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Editora",
+			"item": [
+				{
+					"name": "Cadastrar Editora",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Cia das Letras\"\n}"
+						},
+						"url": { "raw": "http://localhost:8080/api/v1/editora", "host": ["http://localhost:8080"], "path": ["api", "v1", "editora"] }
+					}
+				},
+				{
+					"name": "Listar Editoras",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "http://localhost:8080/api/v1/editora/all", "host": ["http://localhost:8080"], "path": ["api", "v1", "editora", "all"] }
+					}
+				},
+				{
+					"name": "Buscar Editora por ID",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "http://localhost:8080/api/v1/editora/1", "host": ["http://localhost:8080"], "path": ["api", "v1", "editora", "1"] }
+					}
+				},
+				{
+					"name": "Buscar Editora por Nome",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "http://localhost:8080/api/v1/editora/buscar?nome=Cia", "host": ["http://localhost:8080"], "path": ["api", "v1", "editora", "buscar"], "query": [{ "key": "nome", "value": "Cia" }] }
+					}
+				},
+				{
+					"name": "Atualizar Editora",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Editora Saraiva\"\n}"
+						},
+						"url": { "raw": "http://localhost:8080/api/v1/editora/1", "host": ["http://localhost:8080"], "path": ["api", "v1", "editora", "1"] }
+					}
+				},
+				{
+					"name": "Deletar Editora",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{ "key": "X-API-Key", "value": "COLE_SUA_CHAVE_AQUI" }
+						],
+						"url": { "raw": "http://localhost:8080/api/v1/editora/1", "host": ["http://localhost:8080"], "path": ["api", "v1", "editora", "1"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Genero",
+			"item": [
+				{
+					"name": "Cadastrar Genero",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Literatura\"\n}"
+						},
+						"url": { "raw": "http://localhost:8080/api/v1/genero", "host": ["http://localhost:8080"], "path": ["api", "v1", "genero"] }
+					}
+				},
+				{
+					"name": "Listar Generos",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "http://localhost:8080/api/v1/genero/all", "host": ["http://localhost:8080"], "path": ["api", "v1", "genero", "all"] }
+					}
+				},
+				{
+					"name": "Buscar Genero por ID",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "http://localhost:8080/api/v1/genero/1", "host": ["http://localhost:8080"], "path": ["api", "v1", "genero", "1"] }
+					}
+				},
+				{
+					"name": "Deletar Genero",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{ "key": "X-API-Key", "value": "COLE_SUA_CHAVE_AQUI" }
+						],
+						"url": { "raw": "http://localhost:8080/api/v1/genero/1", "host": ["http://localhost:8080"], "path": ["api", "v1", "genero", "1"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Idioma",
+			"item": [
+				{
+					"name": "Cadastrar Idioma",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Portugues\"\n}"
+						},
+						"url": { "raw": "http://localhost:8080/api/v1/idioma", "host": ["http://localhost:8080"], "path": ["api", "v1", "idioma"] }
+					}
+				},
+				{
+					"name": "Listar Idiomas",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "http://localhost:8080/api/v1/idioma/all", "host": ["http://localhost:8080"], "path": ["api", "v1", "idioma", "all"] }
+					}
+				},
+				{
+					"name": "Buscar Idioma por ID",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "http://localhost:8080/api/v1/idioma/1", "host": ["http://localhost:8080"], "path": ["api", "v1", "idioma", "1"] }
+					}
+				},
+				{
+					"name": "Deletar Idioma",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{ "key": "X-API-Key", "value": "COLE_SUA_CHAVE_AQUI" }
+						],
+						"url": { "raw": "http://localhost:8080/api/v1/idioma/1", "host": ["http://localhost:8080"], "path": ["api", "v1", "idioma", "1"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Autor",
+			"item": [
+				{
+					"name": "Cadastrar Autor",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Machado de Assis\",\n  \"detalhesAutor\": {\n    \"nacionalidade\": \"Brasileiro\"\n  }\n}"
+						},
+						"url": { "raw": "http://localhost:8080/api/v1/autor", "host": ["http://localhost:8080"], "path": ["api", "v1", "autor"] }
+					}
+				},
+				{
+					"name": "Listar Autores",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "http://localhost:8080/api/v1/autor/all", "host": ["http://localhost:8080"], "path": ["api", "v1", "autor", "all"] }
+					}
+				},
+				{
+					"name": "Buscar Autor por ID",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "http://localhost:8080/api/v1/autor/1", "host": ["http://localhost:8080"], "path": ["api", "v1", "autor", "1"] }
+					}
+				},
+				{
+					"name": "Buscar Autor por Nome",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "http://localhost:8080/api/v1/autor/buscar?nome=Machado", "host": ["http://localhost:8080"], "path": ["api", "v1", "autor", "buscar"], "query": [{ "key": "nome", "value": "Machado" }] }
+					}
+				},
+				{
+					"name": "Deletar Autor",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{ "key": "X-API-Key", "value": "COLE_SUA_CHAVE_AQUI" }
+						],
+						"url": { "raw": "http://localhost:8080/api/v1/autor/1", "host": ["http://localhost:8080"], "path": ["api", "v1", "autor", "1"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Livro",
+			"item": [
+				{
+					"name": "Cadastrar Livro",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Dom Casmurro\",\n  \"descricao\": \"Romance classico brasileiro\",\n  \"isbn\": \"978-85-359-0277-1\",\n  \"numPaginas\": 256,\n  \"generoId\": 1,\n  \"editoraId\": 1,\n  \"idiomaId\": 1,\n  \"autoresId\": [1],\n  \"status\": \"DISPONIVEL\"\n}"
+						},
+						"url": { "raw": "http://localhost:8080/api/v1/livro", "host": ["http://localhost:8080"], "path": ["api", "v1", "livro"] }
+					}
+				},
+				{
+					"name": "Cadastrar Livro (com Idempotency-Key)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Idempotency-Key", "value": "chave-unica-123" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Memorias Postumas\",\n  \"descricao\": \"Outro classico\",\n  \"isbn\": \"978-85-359-0278-8\",\n  \"numPaginas\": 200,\n  \"generoId\": 1,\n  \"editoraId\": 1,\n  \"idiomaId\": 1,\n  \"autoresId\": [1],\n  \"status\": \"DISPONIVEL\"\n}"
+						},
+						"url": { "raw": "http://localhost:8080/api/v1/livro", "host": ["http://localhost:8080"], "path": ["api", "v1", "livro"] }
+					}
+				},
+				{
+					"name": "Listar Livros",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "http://localhost:8080/api/v1/livro/all", "host": ["http://localhost:8080"], "path": ["api", "v1", "livro", "all"] }
+					}
+				},
+				{
+					"name": "Buscar Livro por ID",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "http://localhost:8080/api/v1/livro/1", "host": ["http://localhost:8080"], "path": ["api", "v1", "livro", "1"] }
+					}
+				},
+				{
+					"name": "Buscar Livro por Nome",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "http://localhost:8080/api/v1/livro/buscar?nome=Dom", "host": ["http://localhost:8080"], "path": ["api", "v1", "livro", "buscar"], "query": [{ "key": "nome", "value": "Dom" }] }
+					}
+				},
+				{
+					"name": "Buscar Livro por Status",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "http://localhost:8080/api/v1/livro/status?status=DISPONIVEL", "host": ["http://localhost:8080"], "path": ["api", "v1", "livro", "status"], "query": [{ "key": "status", "value": "DISPONIVEL" }] }
+					}
+				},
+				{
+					"name": "Atualizar Livro",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Dom Casmurro - Edicao Revisada\",\n  \"descricao\": \"Romance classico brasileiro\",\n  \"isbn\": \"978-85-359-0277-1\",\n  \"numPaginas\": 260,\n  \"generoId\": 1,\n  \"editoraId\": 1,\n  \"idiomaId\": 1,\n  \"autoresId\": [1],\n  \"status\": \"EMPRESTADO\"\n}"
+						},
+						"url": { "raw": "http://localhost:8080/api/v1/livro/1", "host": ["http://localhost:8080"], "path": ["api", "v1", "livro", "1"] }
+					}
+				},
+				{
+					"name": "Deletar Livro",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{ "key": "X-API-Key", "value": "COLE_SUA_CHAVE_AQUI" }
+						],
+						"url": { "raw": "http://localhost:8080/api/v1/livro/1", "host": ["http://localhost:8080"], "path": ["api", "v1", "livro", "1"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Livro V2",
+			"item": [
+				{
+					"name": "Buscar Livro por ID (V2)",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "http://localhost:8080/api/v2/livro/1", "host": ["http://localhost:8080"], "path": ["api", "v2", "livro", "1"] }
+					}
+				},
+				{
+					"name": "Listar Livros (V2)",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "http://localhost:8080/api/v2/livro/all", "host": ["http://localhost:8080"], "path": ["api", "v2", "livro", "all"] }
+					}
+				}
+			]
+		}
+	]
+}
