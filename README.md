@@ -95,3 +95,41 @@ As respostas de GET por ID e POST incluem links para navegacao entre recursos (s
 ## Tratamento de erros
 
 Erros sao tratados globalmente com @ControllerAdvice, retornando JSON com timestamp, status, tipo do erro e mensagem. Erros de validacao incluem detalhes por campo.
+
+## Deploy no Render
+
+### Configuracao
+
+O projeto esta configurado para deploy no Render com Docker:
+
+- `Dockerfile` - Configuracao do container (multi-stage build com Maven + JRE)
+- `application.properties` - Usa a variavel `PORT` do Render automaticamente
+
+### Como fazer deploy
+
+1. Subir o codigo para o GitHub:
+
+```bash
+git add .
+git commit -m "Deploy no Render"
+git push origin main
+```
+
+2. Configurar no Render (Plano Gratuito):
+
+- Acesse https://render.com
+- Faca login com sua conta GitHub
+- Clique em "New +" > "Web Service"
+- Conecte o repositorio `isabellematos/biblioteca-api-senac`
+- Configure:
+  - Name: `biblioteca-api-senac`
+  - Environment: Docker
+  - Dockerfile Path: `./Dockerfile`
+  - Build Command: (deixar vazio)
+  - Start Command: (deixar vazio)
+- Clique em "Create Web Service"
+
+### URLs apos deploy
+
+- Swagger UI: https://biblioteca-api-senac.onrender.com/swagger-ui/index.html
+- Endpoints da API: https://biblioteca-api-senac.onrender.com/api/v1/
