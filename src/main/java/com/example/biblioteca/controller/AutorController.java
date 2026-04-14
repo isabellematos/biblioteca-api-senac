@@ -32,7 +32,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 
-@Tag(name = "Autor")
 @RestController
 @RequestMapping("/autor")
 public class AutorController {
