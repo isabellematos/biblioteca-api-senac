@@ -1,0 +1,172 @@
+{
+	"info": {
+		"name": "Biblioteca API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Editora",
+			"item": [
+				{
+					"name": "Cadastrar Editora",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n  \"nome\": \"Cia das Letras\"\n}" },
+						"url": { "raw": "http://localhost:8080/editora", "host": ["http://localhost:8080"], "path": ["editora"] }
+					}
+				},
+				{
+					"name": "Listar Editoras",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8080/editora/all", "host": ["http://localhost:8080"], "path": ["editora", "all"] } }
+				},
+				{
+					"name": "Buscar Editora por ID",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8080/editora/1", "host": ["http://localhost:8080"], "path": ["editora", "1"] } }
+				},
+				{
+					"name": "Buscar Editora por Nome",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8080/editora/buscar?nome=Cia", "host": ["http://localhost:8080"], "path": ["editora", "buscar"], "query": [{ "key": "nome", "value": "Cia" }] } }
+				},
+				{
+					"name": "Atualizar Editora",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n  \"nome\": \"Editora Saraiva\"\n}" },
+						"url": { "raw": "http://localhost:8080/editora/1", "host": ["http://localhost:8080"], "path": ["editora", "1"] }
+					}
+				},
+				{
+					"name": "Deletar Editora",
+					"request": { "method": "DELETE", "url": { "raw": "http://localhost:8080/editora/1", "host": ["http://localhost:8080"], "path": ["editora", "1"] } }
+				}
+			]
+		},
+		{
+			"name": "Genero",
+			"item": [
+				{
+					"name": "Cadastrar Genero",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n  \"nome\": \"Literatura\"\n}" },
+						"url": { "raw": "http://localhost:8080/genero", "host": ["http://localhost:8080"], "path": ["genero"] }
+					}
+				},
+				{
+					"name": "Listar Generos",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8080/genero/all", "host": ["http://localhost:8080"], "path": ["genero", "all"] } }
+				},
+				{
+					"name": "Buscar Genero por ID",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8080/genero/1", "host": ["http://localhost:8080"], "path": ["genero", "1"] } }
+				},
+				{
+					"name": "Deletar Genero",
+					"request": { "method": "DELETE", "url": { "raw": "http://localhost:8080/genero/1", "host": ["http://localhost:8080"], "path": ["genero", "1"] } }
+				}
+			]
+		},
+		{
+			"name": "Idioma",
+			"item": [
+				{
+					"name": "Cadastrar Idioma",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n  \"nome\": \"Portugues\"\n}" },
+						"url": { "raw": "http://localhost:8080/idioma", "host": ["http://localhost:8080"], "path": ["idioma"] }
+					}
+				},
+				{
+					"name": "Listar Idiomas",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8080/idioma/all", "host": ["http://localhost:8080"], "path": ["idioma", "all"] } }
+				},
+				{
+					"name": "Buscar Idioma por ID",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8080/idioma/1", "host": ["http://localhost:8080"], "path": ["idioma", "1"] } }
+				},
+				{
+					"name": "Deletar Idioma",
+					"request": { "method": "DELETE", "url": { "raw": "http://localhost:8080/idioma/1", "host": ["http://localhost:8080"], "path": ["idioma", "1"] } }
+				}
+			]
+		},
+		{
+			"name": "Autor",
+			"item": [
+				{
+					"name": "Cadastrar Autor",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n  \"nome\": \"Machado de Assis\",\n  \"detalhesAutor\": {\n    \"nacionalidade\": \"Brasileiro\"\n  }\n}" },
+						"url": { "raw": "http://localhost:8080/autor", "host": ["http://localhost:8080"], "path": ["autor"] }
+					}
+				},
+				{
+					"name": "Listar Autores",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8080/autor/all", "host": ["http://localhost:8080"], "path": ["autor", "all"] } }
+				},
+				{
+					"name": "Buscar Autor por ID",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8080/autor/1", "host": ["http://localhost:8080"], "path": ["autor", "1"] } }
+				},
+				{
+					"name": "Buscar Autor por Nome",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8080/autor/buscar?nome=Machado", "host": ["http://localhost:8080"], "path": ["autor", "buscar"], "query": [{ "key": "nome", "value": "Machado" }] } }
+				},
+				{
+					"name": "Deletar Autor",
+					"request": { "method": "DELETE", "url": { "raw": "http://localhost:8080/autor/1", "host": ["http://localhost:8080"], "path": ["autor", "1"] } }
+				}
+			]
+		},
+		{
+			"name": "Livro",
+			"item": [
+				{
+					"name": "Cadastrar Livro",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n  \"nome\": \"Dom Casmurro\",\n  \"descricao\": \"Romance classico brasileiro\",\n  \"isbn\": \"978-85-359-0277-1\",\n  \"numPaginas\": 256,\n  \"generoId\": 1,\n  \"editoraId\": 1,\n  \"idiomaId\": 1,\n  \"autoresId\": [1],\n  \"status\": \"DISPONIVEL\"\n}" },
+						"url": { "raw": "http://localhost:8080/livro", "host": ["http://localhost:8080"], "path": ["livro"] }
+					}
+				},
+				{
+					"name": "Listar Livros",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8080/livro/all", "host": ["http://localhost:8080"], "path": ["livro", "all"] } }
+				},
+				{
+					"name": "Buscar Livro por ID",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8080/livro/1", "host": ["http://localhost:8080"], "path": ["livro", "1"] } }
+				},
+				{
+					"name": "Buscar Livro por Nome",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8080/livro/buscar?nome=Dom", "host": ["http://localhost:8080"], "path": ["livro", "buscar"], "query": [{ "key": "nome", "value": "Dom" }] } }
+				},
+				{
+					"name": "Buscar Livro por Status",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8080/livro/status?status=DISPONIVEL", "host": ["http://localhost:8080"], "path": ["livro", "status"], "query": [{ "key": "status", "value": "DISPONIVEL" }] } }
+				},
+				{
+					"name": "Atualizar Livro",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n  \"nome\": \"Dom Casmurro - Edicao Revisada\",\n  \"descricao\": \"Romance classico brasileiro\",\n  \"isbn\": \"978-85-359-0277-1\",\n  \"numPaginas\": 260,\n  \"generoId\": 1,\n  \"editoraId\": 1,\n  \"idiomaId\": 1,\n  \"autoresId\": [1],\n  \"status\": \"EMPRESTADO\"\n}" },
+						"url": { "raw": "http://localhost:8080/livro/1", "host": ["http://localhost:8080"], "path": ["livro", "1"] }
+					}
+				},
+				{
+					"name": "Deletar Livro",
+					"request": { "method": "DELETE", "url": { "raw": "http://localhost:8080/livro/1", "host": ["http://localhost:8080"], "path": ["livro", "1"] } }
+				}
+			]
+		}
+	]
+}
