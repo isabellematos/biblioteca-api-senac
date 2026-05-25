@@ -31,6 +31,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 
 @RestController
@@ -43,10 +44,10 @@ public class AutorController {
 
 	@Operation(summary = "Encontra autor por ID")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Autor encontrado"),
-			@ApiResponse(responseCode = "400", description = "Requisição inválida"),
-			@ApiResponse(responseCode = "404", description = "Autor não encontrado"),
-			@ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+			@ApiResponse(responseCode = "200", description = "O autor foi encontrado com sucesso no cadastro da biblioteca."),
+			@ApiResponse(responseCode = "400", description = "O ID informado para buscar o autor e invalido."),
+			@ApiResponse(responseCode = "404", description = "Nenhum autor foi encontrado com esse ID no cadastro."),
+			@ApiResponse(responseCode = "429", description = "Muitas consultas de autores em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/{id}")
 	public ResponseEntity<EntityModel<AutorDTO>> retornarAutorId(
@@ -62,11 +63,14 @@ public class AutorController {
 
 	@Operation(summary = "Cadastra um novo autor")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "201", description = "Autor criado com sucesso"),
-			@ApiResponse(responseCode = "400", description = "Dados inválidos"),
-			@ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+			@ApiResponse(responseCode = "201", description = "Novo autor cadastrado com sucesso no sistema da biblioteca."),
+			@ApiResponse(responseCode = "400", description = "Os dados enviados para cadastrar o autor sao invalidos. Verifique nome e demais campos obrigatorios."),
+			@ApiResponse(responseCode = "401", description = "Acesso nao autorizado. Uma X-API-Key valida e necessaria para cadastrar autores."),
+			@ApiResponse(responseCode = "409", description = "Conflito detectado. Ja existe um autor com esses dados no cadastro."),
+			@ApiResponse(responseCode = "429", description = "Muitas tentativas de cadastro de autores em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@PostMapping
+	@SecurityRequirement(name = "X-API-Key")
 	public ResponseEntity<EntityModel<AutorDTO>> cadastrarAutor(
 			@io.swagger.v3.oas.annotations.parameters.RequestBody(
 					description = "Dados do autor", required = true,
@@ -83,12 +87,15 @@ public class AutorController {
 
 	@Operation(summary = "Altera um autor por ID")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Autor atualizado"),
-			@ApiResponse(responseCode = "400", description = "Dados inválidos"),
-			@ApiResponse(responseCode = "404", description = "Autor não encontrado"),
-			@ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+			@ApiResponse(responseCode = "200", description = "O autor foi atualizado com sucesso no cadastro da biblioteca."),
+			@ApiResponse(responseCode = "400", description = "Os dados enviados para atualizar o autor sao invalidos. Verifique nome e demais campos."),
+			@ApiResponse(responseCode = "401", description = "Acesso nao autorizado. Uma X-API-Key valida e necessaria para atualizar autores."),
+			@ApiResponse(responseCode = "404", description = "Nenhum autor foi encontrado com esse ID para atualizacao."),
+			@ApiResponse(responseCode = "409", description = "Conflito detectado. Ja existe outro autor com esses dados no cadastro."),
+			@ApiResponse(responseCode = "429", description = "Muitas tentativas de atualizacao de autores em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@PutMapping("/{id}")
+	@SecurityRequirement(name = "X-API-Key")
 	public ResponseEntity<EntityModel<AutorDTO>> atualizarAutorId(
 			@Parameter(description = "ID do autor") @PathVariable("id") Integer id,
 			@Valid @RequestBody AutorDTO a) {
@@ -101,12 +108,16 @@ public class AutorController {
 
 	@Operation(summary = "Deleta um autor por ID")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "204", description = "Autor deletado"),
-			@ApiResponse(responseCode = "400", description = "Requisição inválida"),
-			@ApiResponse(responseCode = "404", description = "Autor não encontrado"),
-			@ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+			@ApiResponse(responseCode = "204", description = "O autor foi removido com sucesso do cadastro da biblioteca."),
+			@ApiResponse(responseCode = "400", description = "O ID informado para remover o autor e invalido."),
+			@ApiResponse(responseCode = "401", description = "Acesso nao autorizado. Uma X-API-Key valida e necessaria para remover autores."),
+			@ApiResponse(responseCode = "404", description = "Nenhum autor foi encontrado com esse ID no cadastro."),
+			@ApiResponse(responseCode = "409", description = "Conflito ao remover o autor. Existem livros vinculados a este autor."),
+			@ApiResponse(responseCode = "422", description = "O autor possui livros vinculados. Remova os livros antes de excluir o autor."),
+			@ApiResponse(responseCode = "429", description = "Muitas remocoes de autores em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@DeleteMapping("/{id}")
+	@SecurityRequirement(name = "X-API-Key")
 	public ResponseEntity<Void> deletarAutorId(
 			@Parameter(description = "ID do autor") @PathVariable("id") Integer id) {
 		autorService.deletarAutorId(id);
@@ -115,9 +126,9 @@ public class AutorController {
 
 	@Operation(summary = "Encontra todos os autores")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Lista de autores retornada"),
-			@ApiResponse(responseCode = "400", description = "Parâmetros de paginação inválidos"),
-			@ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+			@ApiResponse(responseCode = "200", description = "A lista de autores cadastrados foi retornada com sucesso."),
+			@ApiResponse(responseCode = "400", description = "Os parametros de paginacao informados sao invalidos."),
+			@ApiResponse(responseCode = "429", description = "Muitas consultas de autores em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/all")
 	public ResponseEntity<Page<AutorDTO>> retornarTodosOsAutores(@ParameterObject Pageable pageable) {
@@ -126,9 +137,9 @@ public class AutorController {
 
 	@Operation(summary = "Busca autores por nome")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Resultado da busca"),
-			@ApiResponse(responseCode = "400", description = "Parâmetro de busca inválido"),
-			@ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+			@ApiResponse(responseCode = "200", description = "A busca por autores foi realizada com sucesso."),
+			@ApiResponse(responseCode = "400", description = "O parametro de busca informado para pesquisar autores e invalido."),
+			@ApiResponse(responseCode = "429", description = "Muitas buscas de autores em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/buscar")
 	public ResponseEntity<Page<AutorDTO>> buscarPorNome(

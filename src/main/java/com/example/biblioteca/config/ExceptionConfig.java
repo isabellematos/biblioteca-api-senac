@@ -5,11 +5,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import com.example.biblioteca.exception.ConflictException;
 
 @RestControllerAdvice
 public class ExceptionConfig {
@@ -43,6 +46,18 @@ public class ExceptionConfig {
 	public ResponseEntity<Map<String, Object>> illegalArgument(IllegalArgumentException ex) {
 		return ResponseEntity.badRequest()
 				.body(buildError(HttpStatus.BAD_REQUEST, ex.getMessage() != null ? ex.getMessage() : "Argumento inválido"));
+	}
+
+	@ExceptionHandler(ConflictException.class)
+	public ResponseEntity<Map<String, Object>> conflict(ConflictException ex) {
+		return ResponseEntity.status(HttpStatus.CONFLICT)
+				.body(buildError(HttpStatus.CONFLICT, ex.getMessage()));
+	}
+
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ResponseEntity<Map<String, Object>> dataIntegrity(DataIntegrityViolationException ex) {
+		return ResponseEntity.status(HttpStatus.CONFLICT)
+				.body(buildError(HttpStatus.CONFLICT, "Registro duplicado ou violação de integridade"));
 	}
 
 	@ExceptionHandler(Exception.class)

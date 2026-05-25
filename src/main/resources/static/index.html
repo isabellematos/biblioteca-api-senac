@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca</title>
+    <style>
+        :root { --cor-principal: #2c3e50; --cor-accent: #3498db; --cor-fundo: #ecf0f1; --cor-card: #fff; --cor-texto: #333; --cor-sucesso: #27ae60; --cor-erro: #c0392b; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--cor-fundo); color: var(--cor-texto); margin: 0; padding: 0; }
+        header { background: var(--cor-principal); color: #fff; padding: 15px 30px; display: flex; align-items: center; justify-content: space-between; }
+        header h1 { font-size: 20px; font-weight: 600; margin: 0; }
+        header small { opacity: 0.7; font-size: 12px; }
+        .wrapper { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        nav { display: flex; gap: 8px; margin-bottom: 25px; flex-wrap: wrap; }
+        nav button { padding: 9px 18px; border: 2px solid var(--cor-principal); background: transparent; color: var(--cor-principal); border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; }
+        nav button:hover, nav button.active { background: var(--cor-principal); color: #fff; }
+        .section { display: none; }
+        .section.active { display: block; }
+        .card { background: var(--cor-card); border-radius: 8px; padding: 25px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+        .card h2 { margin: 0 0 18px 0; font-size: 18px; color: var(--cor-principal); border-bottom: 2px solid var(--cor-fundo); padding-bottom: 10px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-grid.single { grid-template-columns: 1fr; }
+        .field { display: flex; flex-direction: column; }
+        .field label { font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #555; text-transform: uppercase; letter-spacing: 0.5px; }
+        .field input, .field select { padding: 9px 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; transition: border 0.2s; }
+        .field input:focus, .field select:focus { outline: none; border-color: var(--cor-accent); }
+        .actions { margin-top: 15px; display: flex; gap: 10px; }
+        .btn { padding: 9px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: 500; transition: opacity 0.2s; }
+        .btn:hover { opacity: 0.85; }
+        .btn-primary { background: var(--cor-accent); color: #fff; }
+        .btn-secondary { background: #95a5a6; color: #fff; }
+        .output { margin-top: 20px; }
+        .alert { padding: 12px 15px; border-radius: 5px; margin-bottom: 10px; font-size: 13px; }
+        .alert-ok { background: #d5f5e3; color: var(--cor-sucesso); }
+        .alert-err { background: #fadbd8; color: var(--cor-erro); }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: var(--cor-principal); color: #fff; padding: 10px 12px; text-align: left; font-weight: 500; }
+        td { padding: 9px 12px; border-bottom: 1px solid #eee; }
+        tr:hover td { background: #f7f9fa; }
+        @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div><h1>Biblioteca</h1><small>Sistema de gerenciamento</small></div>
+    </header>
+
+    <div class="wrapper">
+        <nav>
+            <button class="active" onclick="trocarAba('livros', this)">Livros</button>
+            <button onclick="trocarAba('autores', this)">Autores</button>
+            <button onclick="trocarAba('editoras', this)">Editoras</button>
+            <button onclick="trocarAba('generos', this)">Generos</button>
+            <button onclick="trocarAba('idiomas', this)">Idiomas</button>
+            <button onclick="trocarAba('usuarios', this)">Usuarios</button>
+            <button onclick="trocarAba('emprestimos', this)">Emprestimos</button>
+        </nav>
+
+        <!-- LIVROS -->
+        <div id="livros" class="section active">
+            <div class="card">
+                <h2>Cadastrar livro</h2>
+                <form onsubmit="cadastrarLivro(event)">
+                    <div class="form-grid">
+                        <div class="field"><label>Nome</label><input id="l-nome" required></div>
+                        <div class="field"><label>ISBN</label><input id="l-isbn" required></div>
+                        <div class="field"><label>Descricao</label><input id="l-desc" required></div>
+                        <div class="field"><label>Paginas</label><input type="number" id="l-pag" required></div>
+                        <div class="field"><label>Editora ID</label><input type="number" id="l-ed" required></div>
+                        <div class="field"><label>Genero ID</label><input type="number" id="l-gen" required></div>
+                        <div class="field"><label>Idioma ID</label><input type="number" id="l-idi" required></div>
+                        <div class="field"><label>Autor IDs (virgula)</label><input id="l-aut" required></div>
+                        <div class="field"><label>Status</label>
+                            <select id="l-status"><option>DISPONIVEL</option><option>EMPRESTADO</option><option>RESERVADO</option></select>
+                        </div>
+                    </div>
+                    <div class="actions"><button type="submit" class="btn btn-primary">Cadastrar</button><button type="button" class="btn btn-secondary" onclick="listar('livro','livros-out')">Listar todos</button></div>
+                </form>
+            </div>
+            <div id="livros-out" class="output"></div>
+        </div>
+
+        <!-- AUTORES -->
+        <div id="autores" class="section">
+            <div class="card">
+                <h2>Cadastrar autor</h2>
+                <form onsubmit="cadastrarAutor(event)">
+                    <div class="form-grid">
+                        <div class="field"><label>Nome</label><input id="a-nome" required></div>
+                        <div class="field"><label>Nacionalidade</label><input id="a-nac" required></div>
+                    </div>
+                    <div class="actions"><button type="submit" class="btn btn-primary">Cadastrar</button><button type="button" class="btn btn-secondary" onclick="listar('autor','autores-out')">Listar todos</button></div>
+                </form>
+            </div>
+            <div id="autores-out" class="output"></div>
+        </div>
+
+        <!-- EDITORAS -->
+        <div id="editoras" class="section">
+            <div class="card">
+                <h2>Cadastrar editora</h2>
+                <form onsubmit="cadastrarSimples(event,'editora','ed-nome','editoras-out')">
+                    <div class="form-grid single"><div class="field"><label>Nome</label><input id="ed-nome" required></div></div>
+                    <div class="actions"><button type="submit" class="btn btn-primary">Cadastrar</button><button type="button" class="btn btn-secondary" onclick="listar('editora','editoras-out')">Listar todas</button></div>
+                </form>
+            </div>
+            <div id="editoras-out" class="output"></div>
+        </div>
+
+        <!-- GENEROS -->
+        <div id="generos" class="section">
+            <div class="card">
+                <h2>Cadastrar genero</h2>
+                <form onsubmit="cadastrarSimples(event,'genero','g-nome','generos-out')">
+                    <div class="form-grid single"><div class="field"><label>Nome</label><input id="g-nome" required></div></div>
+                    <div class="actions"><button type="submit" class="btn btn-primary">Cadastrar</button><button type="button" class="btn btn-secondary" onclick="listar('genero','generos-out')">Listar todos</button></div>
+                </form>
+            </div>
+            <div id="generos-out" class="output"></div>
+        </div>
+
+        <!-- IDIOMAS -->
+        <div id="idiomas" class="section">
+            <div class="card">
+                <h2>Cadastrar idioma</h2>
+                <form onsubmit="cadastrarSimples(event,'idioma','i-nome','idiomas-out')">
+                    <div class="form-grid single"><div class="field"><label>Nome</label><input id="i-nome" required></div></div>
+                    <div class="actions"><button type="submit" class="btn btn-primary">Cadastrar</button><button type="button" class="btn btn-secondary" onclick="listar('idioma','idiomas-out')">Listar todos</button></div>
+                </form>
+            </div>
+            <div id="idiomas-out" class="output"></div>
+        </div>
+
+        <!-- USUARIOS -->
+        <div id="usuarios" class="section">
+            <div class="card">
+                <h2>Cadastrar usuario</h2>
+                <form onsubmit="cadastrarUsuario(event)">
+                    <div class="form-grid">
+                        <div class="field"><label>Nome</label><input id="u-nome" required></div>
+                        <div class="field"><label>Email</label><input type="email" id="u-email" required></div>
+                        <div class="field"><label>Telefone</label><input id="u-tel" required></div>
+                    </div>
+                    <div class="actions"><button type="submit" class="btn btn-primary">Cadastrar</button><button type="button" class="btn btn-secondary" onclick="listar('usuario','usuarios-out')">Listar todos</button></div>
+                </form>
+            </div>
+            <div id="usuarios-out" class="output"></div>
+        </div>
+
+        <!-- EMPRESTIMOS -->
+        <div id="emprestimos" class="section">
+            <div class="card">
+                <h2>Realizar emprestimo</h2>
+                <form onsubmit="realizarEmprestimo(event)">
+                    <div class="form-grid">
+                        <div class="field"><label>Usuario ID</label><input type="number" id="e-uid" required></div>
+                        <div class="field"><label>Livro ID</label><input type="number" id="e-lid" required></div>
+                        <div class="field"><label>Dias para devolucao</label><input type="number" id="e-dias" value="14"></div>
+                    </div>
+                    <div class="actions"><button type="submit" class="btn btn-primary">Emprestar</button><button type="button" class="btn btn-secondary" onclick="listar('emprestimo','emprestimos-out')">Listar todos</button></div>
+                </form>
+            </div>
+            <div id="emprestimos-out" class="output"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = localStorage.getItem('apiKey') || '';
+
+        function headers() {
+            const h = { 'Content-Type': 'application/json' };
+            if (API_KEY) h['X-API-Key'] = API_KEY;
+            return h;
+        }
+
+        function trocarAba(id, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function msg(container, text, ok) {
+            document.getElementById(container).innerHTML = '<div class="alert ' + (ok ? 'alert-ok' : 'alert-err') + '">' + text + '</div>';
+        }
+
+        async function cadastrarSimples(e, entidade, inputId, outId) {
+            e.preventDefault();
+            const nome = document.getElementById(inputId).value;
+            const res = await fetch('/' + entidade, { method: 'POST', headers: headers(), body: JSON.stringify({ nome }) });
+            const data = await res.json();
+            if (res.ok) { msg(outId, 'Cadastrado! ID: ' + data.id, true); document.getElementById(inputId).value = ''; }
+            else msg(outId, data.mensagem || JSON.stringify(data), false);
+        }
+
+        async function cadastrarAutor(e) {
+            e.preventDefault();
+            const body = { nome: document.getElementById('a-nome').value, detalhesAutor: { nacionalidade: document.getElementById('a-nac').value } };
+            const res = await fetch('/autor', { method: 'POST', headers: headers(), body: JSON.stringify(body) });
+            const data = await res.json();
+            if (res.ok) { msg('autores-out', 'Cadastrado! ID: ' + data.id, true); document.getElementById('a-nome').value = ''; document.getElementById('a-nac').value = ''; }
+            else msg('autores-out', data.mensagem || JSON.stringify(data), false);
+        }
+
+        async function cadastrarUsuario(e) {
+            e.preventDefault();
+            const body = { nome: document.getElementById('u-nome').value, email: document.getElementById('u-email').value, telefone: document.getElementById('u-tel').value };
+            const res = await fetch('/usuario', { method: 'POST', headers: headers(), body: JSON.stringify(body) });
+            const data = await res.json();
+            if (res.ok) { msg('usuarios-out', 'Cadastrado! ID: ' + data.id, true); }
+            else msg('usuarios-out', data.mensagem || JSON.stringify(data), false);
+        }
+
+        async function cadastrarLivro(e) {
+            e.preventDefault();
+            const body = {
+                nome: document.getElementById('l-nome').value,
+                descricao: document.getElementById('l-desc').value,
+                isbn: document.getElementById('l-isbn').value,
+                numPaginas: parseInt(document.getElementById('l-pag').value),
+                editoraId: parseInt(document.getElementById('l-ed').value),
+                generoId: parseInt(document.getElementById('l-gen').value),
+                idiomaId: parseInt(document.getElementById('l-idi').value),
+                autoresId: document.getElementById('l-aut').value.split(',').map(s => parseInt(s.trim())),
+                status: document.getElementById('l-status').value
+            };
+            const res = await fetch('/livro', { method: 'POST', headers: headers(), body: JSON.stringify(body) });
+            const data = await res.json();
+            if (res.ok) msg('livros-out', 'Cadastrado! ID: ' + data.id, true);
+            else msg('livros-out', data.mensagem || JSON.stringify(data), false);
+        }
+
+        async function realizarEmprestimo(e) {
+            e.preventDefault();
+            const body = { usuarioId: parseInt(document.getElementById('e-uid').value), livroId: parseInt(document.getElementById('e-lid').value), diasParaDevolucao: parseInt(document.getElementById('e-dias').value) };
+            const res = await fetch('/emprestimo', { method: 'POST', headers: headers(), body: JSON.stringify(body) });
+            const data = await res.json();
+            if (res.ok) msg('emprestimos-out', 'Emprestimo realizado! ID: ' + data.id, true);
+            else msg('emprestimos-out', data.mensagem || JSON.stringify(data), false);
+        }
+
+        async function listar(entidade, outId) {
+            const res = await fetch('/' + entidade + '/all');
+            const data = await res.json();
+            if (!data.content || data.content.length === 0) { document.getElementById(outId).innerHTML = '<div class="alert">Nenhum registro.</div>'; return; }
+            const keys = Object.keys(data.content[0]).filter(k => !k.startsWith('_') && k !== 'links');
+            let html = '<table><tr>' + keys.map(k => '<th>' + k + '</th>').join('') + '</tr>';
+            data.content.forEach(item => { html += '<tr>' + keys.map(k => { const v = item[k]; return '<td>' + (Array.isArray(v) ? v.join(', ') : (v != null ? v : '-')) + '</td>'; }).join('') + '</tr>'; });
+            html += '</table>';
+            document.getElementById(outId).innerHTML = html;
+        }
+    </script>
+</body>
+</html>

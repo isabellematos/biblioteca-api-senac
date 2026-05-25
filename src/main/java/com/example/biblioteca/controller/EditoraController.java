@@ -31,6 +31,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 
 @RestController
@@ -43,10 +44,10 @@ public class EditoraController {
 
 	@Operation(summary = "Encontra editora por ID")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Editora encontrada"),
-			@ApiResponse(responseCode = "400", description = "Requisição inválida"),
-			@ApiResponse(responseCode = "404", description = "Editora não encontrada"),
-			@ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+			@ApiResponse(responseCode = "200", description = "A editora foi encontrada com sucesso no cadastro da biblioteca."),
+			@ApiResponse(responseCode = "400", description = "O ID informado para buscar a editora e invalido."),
+			@ApiResponse(responseCode = "404", description = "Nenhuma editora foi encontrada com esse ID no cadastro."),
+			@ApiResponse(responseCode = "429", description = "Muitas consultas de editoras em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/{id}")
 	public ResponseEntity<EntityModel<EditoraDTO>> retornarEditoraId(
@@ -62,11 +63,14 @@ public class EditoraController {
 
 	@Operation(summary = "Cadastra uma nova editora")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "201", description = "Editora criada com sucesso"),
-			@ApiResponse(responseCode = "400", description = "Dados inválidos"),
-			@ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+			@ApiResponse(responseCode = "201", description = "Nova editora cadastrada com sucesso no sistema da biblioteca."),
+			@ApiResponse(responseCode = "400", description = "Os dados enviados para cadastrar a editora sao invalidos. Verifique nome e demais campos obrigatorios."),
+			@ApiResponse(responseCode = "401", description = "Acesso nao autorizado. Uma X-API-Key valida e necessaria para cadastrar editoras."),
+			@ApiResponse(responseCode = "409", description = "Conflito detectado. Ja existe uma editora com esse nome no cadastro."),
+			@ApiResponse(responseCode = "429", description = "Muitas tentativas de cadastro de editoras em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@PostMapping
+	@SecurityRequirement(name = "X-API-Key")
 	public ResponseEntity<EntityModel<EditoraDTO>> cadastrarEditora(
 			@io.swagger.v3.oas.annotations.parameters.RequestBody(
 					description = "Dados da editora", required = true,
@@ -83,12 +87,15 @@ public class EditoraController {
 
 	@Operation(summary = "Altera uma editora por ID")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Editora atualizada"),
-			@ApiResponse(responseCode = "400", description = "Dados inválidos"),
-			@ApiResponse(responseCode = "404", description = "Editora não encontrada"),
-			@ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+			@ApiResponse(responseCode = "200", description = "A editora foi atualizada com sucesso no cadastro da biblioteca."),
+			@ApiResponse(responseCode = "400", description = "Os dados enviados para atualizar a editora sao invalidos. Verifique nome e demais campos."),
+			@ApiResponse(responseCode = "401", description = "Acesso nao autorizado. Uma X-API-Key valida e necessaria para atualizar editoras."),
+			@ApiResponse(responseCode = "404", description = "Nenhuma editora foi encontrada com esse ID para atualizacao."),
+			@ApiResponse(responseCode = "409", description = "Conflito detectado. Ja existe outra editora com esse nome no cadastro."),
+			@ApiResponse(responseCode = "429", description = "Muitas tentativas de atualizacao de editoras em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@PutMapping("/{id}")
+	@SecurityRequirement(name = "X-API-Key")
 	public ResponseEntity<EntityModel<EditoraDTO>> atualizarEditoraId(
 			@Parameter(description = "ID da editora") @PathVariable("id") Integer id,
 			@Valid @RequestBody EditoraDTO e) {
@@ -101,12 +108,16 @@ public class EditoraController {
 
 	@Operation(summary = "Deleta uma editora por ID")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "204", description = "Editora deletada"),
-			@ApiResponse(responseCode = "400", description = "Requisição inválida"),
-			@ApiResponse(responseCode = "404", description = "Editora não encontrada"),
-			@ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+			@ApiResponse(responseCode = "204", description = "A editora foi removida com sucesso do cadastro da biblioteca."),
+			@ApiResponse(responseCode = "400", description = "O ID informado para remover a editora e invalido."),
+			@ApiResponse(responseCode = "401", description = "Acesso nao autorizado. Uma X-API-Key valida e necessaria para remover editoras."),
+			@ApiResponse(responseCode = "404", description = "Nenhuma editora foi encontrada com esse ID no cadastro."),
+			@ApiResponse(responseCode = "409", description = "Conflito ao remover a editora. Existem livros vinculados a esta editora."),
+			@ApiResponse(responseCode = "422", description = "A editora possui livros vinculados. Remova os livros antes de excluir a editora."),
+			@ApiResponse(responseCode = "429", description = "Muitas remocoes de editoras em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@DeleteMapping("/{id}")
+	@SecurityRequirement(name = "X-API-Key")
 	public ResponseEntity<Void> deletarEditoraId(
 			@Parameter(description = "ID da editora") @PathVariable("id") Integer id) {
 		editoraService.deletarEditoraId(id);
@@ -115,9 +126,9 @@ public class EditoraController {
 
 	@Operation(summary = "Encontra todas as editoras")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Lista de editoras retornada"),
-			@ApiResponse(responseCode = "400", description = "Parâmetros de paginação inválidos"),
-			@ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+			@ApiResponse(responseCode = "200", description = "A lista de editoras cadastradas foi retornada com sucesso."),
+			@ApiResponse(responseCode = "400", description = "Os parametros de paginacao informados sao invalidos."),
+			@ApiResponse(responseCode = "429", description = "Muitas consultas de editoras em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/all")
 	public ResponseEntity<Page<EditoraDTO>> retornarTodosAsEditoras(@ParameterObject Pageable pageable) {
@@ -126,9 +137,9 @@ public class EditoraController {
 
 	@Operation(summary = "Busca editoras por nome")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Resultado da busca"),
-			@ApiResponse(responseCode = "400", description = "Parâmetro de busca inválido"),
-			@ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+			@ApiResponse(responseCode = "200", description = "A busca por editoras foi realizada com sucesso."),
+			@ApiResponse(responseCode = "400", description = "O parametro de busca informado para pesquisar editoras e invalido."),
+			@ApiResponse(responseCode = "429", description = "Muitas buscas de editoras em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/buscar")
 	public ResponseEntity<Page<EditoraDTO>> buscarPorNome(
