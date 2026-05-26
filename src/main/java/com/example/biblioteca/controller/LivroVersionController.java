@@ -42,7 +42,11 @@ public class LivroVersionController {
 	@GetMapping("/{id}")
 	public ResponseEntity<?> retornarLivroId(
 			@Parameter(description = "ID do livro") @PathVariable("id") Integer id,
-			@Parameter(description = "Versão da API (1 ou 2)") @RequestHeader(value = "X-API-Version", defaultValue = "1") String version) {
+			@Parameter(description = "Versão da API (1 ou 2)") @RequestHeader(value = "X-API-Version", defaultValue = "2") String version) {
+
+		if (!"1".equals(version) && !"2".equals(version)) {
+			throw new IllegalArgumentException("Versao invalida: '" + version + "'. Versoes suportadas: 1, 2.");
+		}
 
 		LivroDTO livroDTO = livroService.retornarLivroId(id);
 

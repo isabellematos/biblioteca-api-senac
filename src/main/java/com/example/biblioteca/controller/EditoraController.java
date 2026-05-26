@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.biblioteca.domain.Editora;
 import com.example.biblioteca.domain.dto.EditoraDTO;
 import com.example.biblioteca.service.EditoraService;
+import com.example.biblioteca.service.IdempotencyService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,6 +43,9 @@ public class EditoraController {
 
 	@Autowired
 	private EditoraService editoraService;
+
+	@Autowired
+	private IdempotencyService idempotencyService;
 
 	@Operation(summary = "Encontra editora por ID")
 	@ApiResponses(value = {
@@ -75,13 +80,26 @@ public class EditoraController {
 			@io.swagger.v3.oas.annotations.parameters.RequestBody(
 					description = "Dados da editora", required = true,
 					content = @Content(schema = @Schema(implementation = EditoraDTO.class)))
-			@Valid @RequestBody EditoraDTO e) {
+			@Valid @RequestBody EditoraDTO e,
+			@RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
+		if (idempotencyKey == null || idempotencyKey.isBlank()) {
+			throw new IllegalArgumentException("O header Idempotency-Key e obrigatorio e nao pode ser vazio.");
+		}
+		String payloadHash = String.valueOf(e.hashCode());
+		Object cached = idempotencyService.getResponse(idempotencyKey, payloadHash);
+		if (cached != null) {
+			@SuppressWarnings("unchecked")
+			EntityModel<EditoraDTO> cachedResource = (EntityModel<EditoraDTO>) cached;
+			return ResponseEntity.ok(cachedResource);
+		}
+
 		Editora editora = editoraService.cadastrarEditora(e);
 		EntityModel<EditoraDTO> resource = EntityModel.of(new EditoraDTO(editora));
 		Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EditoraController.class).retornarEditoraId(editora.getId())).withSelfRel();
 		resource.add(selfLink);
 		resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EditoraController.class).atualizarEditoraId(editora.getId(), null)).withRel("update"));
 		resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EditoraController.class).deletarEditoraId(editora.getId())).withRel("delete"));
+		idempotencyService.saveResponse(idempotencyKey, payloadHash, resource);
 		return ResponseEntity.created(URI.create(selfLink.getHref())).body(resource);
 	}
 
@@ -127,23 +145,33 @@ public class EditoraController {
 	@Operation(summary = "Encontra todas as editoras")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "A lista de editoras cadastradas foi retornada com sucesso."),
+			@ApiResponse(responseCode = "204", description = "Nenhum registro encontrado para esta consulta."),
 			@ApiResponse(responseCode = "400", description = "Os parametros de paginacao informados sao invalidos."),
 			@ApiResponse(responseCode = "429", description = "Muitas consultas de editoras em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/all")
-	public ResponseEntity<Page<EditoraDTO>> retornarTodosAsEditoras(@ParameterObject Pageable pageable) {
-		return ResponseEntity.ok(editoraService.retornarTodosAsEditoras(pageable));
+	public ResponseEntity<?> retornarTodosAsEditoras(@ParameterObject Pageable pageable) {
+		Page<EditoraDTO> result = editoraService.retornarTodosAsEditoras(pageable);
+		if (result.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(result);
 	}
 
 	@Operation(summary = "Busca editoras por nome")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "A busca por editoras foi realizada com sucesso."),
+			@ApiResponse(responseCode = "204", description = "Nenhum registro encontrado para esta consulta."),
 			@ApiResponse(responseCode = "400", description = "O parametro de busca informado para pesquisar editoras e invalido."),
 			@ApiResponse(responseCode = "429", description = "Muitas buscas de editoras em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/buscar")
-	public ResponseEntity<Page<EditoraDTO>> buscarPorNome(
+	public ResponseEntity<?> buscarPorNome(
 			@RequestParam String nome, @ParameterObject Pageable pageable) {
-		return ResponseEntity.ok(editoraService.buscarPorNome(nome, pageable));
+		Page<EditoraDTO> result = editoraService.buscarPorNome(nome, pageable);
+		if (result.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(result);
 	}
 }

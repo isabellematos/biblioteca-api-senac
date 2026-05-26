@@ -1,12 +1,18 @@
 package com.example.biblioteca.domain;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
+
+import com.example.biblioteca.domain.enums.AccessLevel;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,15 +31,29 @@ public class ApiKey {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer id;
 
-	@Column(unique = true, nullable = false)
-	private String chave;
+	@Column(name = "key_value", unique = true, nullable = false, length = 64)
+	private String keyValue;
+
+	@Column(nullable = false, length = 100)
+	private String owner;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private AccessLevel accessLevel = AccessLevel.WRITE;
 
 	@Column(nullable = false)
-	private String descricao;
+	private Boolean active = true;
 
 	@Column(nullable = false)
-	private Boolean ativa = true;
+	private LocalDateTime createdAt;
 
-	@Column(nullable = false)
-	private LocalDateTime criadaEm = LocalDateTime.now();
+	@PrePersist
+	public void prePersist() {
+		if (this.keyValue == null) {
+			this.keyValue = UUID.randomUUID().toString();
+		}
+		if (this.createdAt == null) {
+			this.createdAt = LocalDateTime.now();
+		}
+	}
 }

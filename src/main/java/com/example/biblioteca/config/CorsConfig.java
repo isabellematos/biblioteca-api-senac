@@ -14,10 +14,13 @@ public class CorsConfig {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/**")
-						.allowedOrigins("http://localhost:3000", "http://localhost:8080")
-						.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-						.allowedHeaders("*")
-						.allowCredentials(true)
+						.allowedOrigins("http://localhost:3000", "http://localhost:5173",
+								"http://localhost:8080", "http://localhost:4200", "*")
+						.allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+						.allowedHeaders("Content-Type", "Accept", "X-API-Key",
+								"Idempotency-Key", "X-Idempotency-Key", "Authorization", "X-API-Version")
+						.exposedHeaders("X-Rate-Limit-Remaining", "X-Rate-Limit-Retry-After-Seconds",
+								"Retry-After", "Location")
 						.maxAge(3600);
 			}
 		};

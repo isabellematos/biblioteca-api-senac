@@ -16,12 +16,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.biblioteca.domain.Usuario;
 import com.example.biblioteca.domain.dto.UsuarioDTO;
+import com.example.biblioteca.service.IdempotencyService;
 import com.example.biblioteca.service.UsuarioService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,6 +43,9 @@ public class UsuarioController {
 
 	@Autowired
 	private UsuarioService usuarioService;
+
+	@Autowired
+	private IdempotencyService idempotencyService;
 
 	@Operation(summary = "Encontra usuario por ID")
 	@ApiResponses(value = {
@@ -75,13 +80,26 @@ public class UsuarioController {
 			@io.swagger.v3.oas.annotations.parameters.RequestBody(
 					description = "Dados do usuario", required = true,
 					content = @Content(schema = @Schema(implementation = UsuarioDTO.class)))
-			@Valid @RequestBody UsuarioDTO dto) {
+			@Valid @RequestBody UsuarioDTO dto,
+			@RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
+		if (idempotencyKey == null || idempotencyKey.isBlank()) {
+			throw new IllegalArgumentException("O header Idempotency-Key e obrigatorio e nao pode ser vazio.");
+		}
+		String payloadHash = String.valueOf(dto.hashCode());
+		Object cached = idempotencyService.getResponse(idempotencyKey, payloadHash);
+		if (cached != null) {
+			@SuppressWarnings("unchecked")
+			EntityModel<UsuarioDTO> cachedResource = (EntityModel<UsuarioDTO>) cached;
+			return ResponseEntity.ok(cachedResource);
+		}
+
 		Usuario usuario = usuarioService.cadastrarUsuario(dto);
 		EntityModel<UsuarioDTO> resource = EntityModel.of(new UsuarioDTO(usuario));
 		Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).retornarUsuarioId(usuario.getId())).withSelfRel();
 		resource.add(selfLink);
 		resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).atualizarUsuario(usuario.getId(), null)).withRel("update"));
 		resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).deletarUsuario(usuario.getId())).withRel("delete"));
+		idempotencyService.saveResponse(idempotencyKey, payloadHash, resource);
 		return ResponseEntity.created(URI.create(selfLink.getHref())).body(resource);
 	}
 
@@ -127,24 +145,34 @@ public class UsuarioController {
 	@Operation(summary = "Encontra todos os usuarios")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "A lista de usuarios cadastrados foi retornada com sucesso."),
+			@ApiResponse(responseCode = "204", description = "Nenhum registro encontrado para esta consulta."),
 			@ApiResponse(responseCode = "400", description = "Os parametros de paginacao informados sao invalidos."),
 			@ApiResponse(responseCode = "429", description = "Muitas consultas de usuarios em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/all")
-	public ResponseEntity<Page<UsuarioDTO>> retornarTodosOsUsuarios(@ParameterObject Pageable pageable) {
-		return ResponseEntity.ok(usuarioService.retornarTodosOsUsuarios(pageable));
+	public ResponseEntity<?> retornarTodosOsUsuarios(@ParameterObject Pageable pageable) {
+		Page<UsuarioDTO> result = usuarioService.retornarTodosOsUsuarios(pageable);
+		if (result.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(result);
 	}
 
 	@Operation(summary = "Busca usuarios por nome")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "A busca por usuarios foi realizada com sucesso."),
+			@ApiResponse(responseCode = "204", description = "Nenhum registro encontrado para esta consulta."),
 			@ApiResponse(responseCode = "400", description = "O parametro de busca informado para pesquisar usuarios e invalido."),
 			@ApiResponse(responseCode = "429", description = "Muitas buscas de usuarios em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/buscar")
-	public ResponseEntity<Page<UsuarioDTO>> buscarPorNome(
+	public ResponseEntity<?> buscarPorNome(
 			@RequestParam String nome, @ParameterObject Pageable pageable) {
-		return ResponseEntity.ok(usuarioService.buscarPorNome(nome, pageable));
+		Page<UsuarioDTO> result = usuarioService.buscarPorNome(nome, pageable);
+		if (result.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(result);
 	}
 
 	@Operation(summary = "Empresta um livro para o usuario")

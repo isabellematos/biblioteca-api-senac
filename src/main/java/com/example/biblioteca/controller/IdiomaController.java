@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.biblioteca.domain.Idioma;
 import com.example.biblioteca.domain.dto.IdiomaDTO;
 import com.example.biblioteca.service.IdiomaService;
+import com.example.biblioteca.service.IdempotencyService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,6 +43,9 @@ public class IdiomaController {
 
 	@Autowired
 	private IdiomaService idiomaService;
+
+	@Autowired
+	private IdempotencyService idempotencyService;
 
 	@Operation(summary = "Encontra idioma por ID")
 	@ApiResponses(value = {
@@ -75,13 +80,26 @@ public class IdiomaController {
 			@io.swagger.v3.oas.annotations.parameters.RequestBody(
 					description = "Dados do idioma", required = true,
 					content = @Content(schema = @Schema(implementation = IdiomaDTO.class)))
-			@Valid @RequestBody IdiomaDTO i) {
+			@Valid @RequestBody IdiomaDTO i,
+			@RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
+		if (idempotencyKey == null || idempotencyKey.isBlank()) {
+			throw new IllegalArgumentException("O header Idempotency-Key e obrigatorio e nao pode ser vazio.");
+		}
+		String payloadHash = String.valueOf(i.hashCode());
+		Object cached = idempotencyService.getResponse(idempotencyKey, payloadHash);
+		if (cached != null) {
+			@SuppressWarnings("unchecked")
+			EntityModel<IdiomaDTO> cachedResource = (EntityModel<IdiomaDTO>) cached;
+			return ResponseEntity.ok(cachedResource);
+		}
+
 		Idioma idioma = idiomaService.cadastrarIdioma(i);
 		EntityModel<IdiomaDTO> resource = EntityModel.of(new IdiomaDTO(idioma));
 		Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(IdiomaController.class).retornarIdiomaId(idioma.getId())).withSelfRel();
 		resource.add(selfLink);
 		resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(IdiomaController.class).atualizarIdiomaId(idioma.getId(), null)).withRel("update"));
 		resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(IdiomaController.class).deletarIdiomaId(idioma.getId())).withRel("delete"));
+		idempotencyService.saveResponse(idempotencyKey, payloadHash, resource);
 		return ResponseEntity.created(URI.create(selfLink.getHref())).body(resource);
 	}
 
@@ -127,23 +145,33 @@ public class IdiomaController {
 	@Operation(summary = "Encontra todos os idiomas")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "A lista de idiomas cadastrados foi retornada com sucesso."),
+			@ApiResponse(responseCode = "204", description = "Nenhum registro encontrado para esta consulta."),
 			@ApiResponse(responseCode = "400", description = "Os parametros de paginacao informados sao invalidos."),
 			@ApiResponse(responseCode = "429", description = "Muitas consultas de idiomas em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/all")
-	public ResponseEntity<Page<IdiomaDTO>> retornarTodosOsIdiomas(@ParameterObject Pageable pageable) {
-		return ResponseEntity.ok(idiomaService.retornarTodosOsIdiomas(pageable));
+	public ResponseEntity<?> retornarTodosOsIdiomas(@ParameterObject Pageable pageable) {
+		Page<IdiomaDTO> result = idiomaService.retornarTodosOsIdiomas(pageable);
+		if (result.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(result);
 	}
 
 	@Operation(summary = "Busca idiomas por nome")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "A busca por idiomas foi realizada com sucesso."),
+			@ApiResponse(responseCode = "204", description = "Nenhum registro encontrado para esta consulta."),
 			@ApiResponse(responseCode = "400", description = "O parametro de busca informado para pesquisar idiomas e invalido."),
 			@ApiResponse(responseCode = "429", description = "Muitas buscas de idiomas em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/buscar")
-	public ResponseEntity<Page<IdiomaDTO>> buscarPorNome(
+	public ResponseEntity<?> buscarPorNome(
 			@RequestParam String nome, @ParameterObject Pageable pageable) {
-		return ResponseEntity.ok(idiomaService.buscarPorNome(nome, pageable));
+		Page<IdiomaDTO> result = idiomaService.buscarPorNome(nome, pageable);
+		if (result.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(result);
 	}
 }

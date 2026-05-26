@@ -9,5 +9,5 @@ import com.example.biblioteca.domain.ApiKey;
 
 @Repository
 public interface ApiKeyRepository extends JpaRepository<ApiKey, Integer> {
-	Optional<ApiKey> findByChaveAndAtivaTrue(String chave);
+	Optional<ApiKey> findByKeyValueAndActiveTrue(String keyValue);
 }

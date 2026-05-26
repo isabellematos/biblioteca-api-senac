@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.biblioteca.domain.Autor;
 import com.example.biblioteca.domain.dto.AutorDTO;
 import com.example.biblioteca.service.AutorService;
+import com.example.biblioteca.service.IdempotencyService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,6 +43,9 @@ public class AutorController {
 
 	@Autowired
 	private AutorService autorService;
+
+	@Autowired
+	private IdempotencyService idempotencyService;
 
 	@Operation(summary = "Encontra autor por ID")
 	@ApiResponses(value = {
@@ -75,13 +80,26 @@ public class AutorController {
 			@io.swagger.v3.oas.annotations.parameters.RequestBody(
 					description = "Dados do autor", required = true,
 					content = @Content(schema = @Schema(implementation = AutorDTO.class)))
-			@Valid @RequestBody AutorDTO a) {
+			@Valid @RequestBody AutorDTO a,
+			@RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
+		if (idempotencyKey == null || idempotencyKey.isBlank()) {
+			throw new IllegalArgumentException("O header Idempotency-Key e obrigatorio e nao pode ser vazio.");
+		}
+		String payloadHash = String.valueOf(a.hashCode());
+		Object cached = idempotencyService.getResponse(idempotencyKey, payloadHash);
+		if (cached != null) {
+			@SuppressWarnings("unchecked")
+			EntityModel<AutorDTO> cachedResource = (EntityModel<AutorDTO>) cached;
+			return ResponseEntity.ok(cachedResource);
+		}
+
 		Autor autor = autorService.cadastrarAutor(a);
 		EntityModel<AutorDTO> resource = EntityModel.of(new AutorDTO(autor));
 		Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(AutorController.class).retornarAutorId(autor.getId())).withSelfRel();
 		resource.add(selfLink);
 		resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(AutorController.class).atualizarAutorId(autor.getId(), null)).withRel("update"));
 		resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(AutorController.class).deletarAutorId(autor.getId())).withRel("delete"));
+		idempotencyService.saveResponse(idempotencyKey, payloadHash, resource);
 		return ResponseEntity.created(URI.create(selfLink.getHref())).body(resource);
 	}
 
@@ -127,23 +145,33 @@ public class AutorController {
 	@Operation(summary = "Encontra todos os autores")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "A lista de autores cadastrados foi retornada com sucesso."),
+			@ApiResponse(responseCode = "204", description = "Nenhum registro encontrado para esta consulta."),
 			@ApiResponse(responseCode = "400", description = "Os parametros de paginacao informados sao invalidos."),
 			@ApiResponse(responseCode = "429", description = "Muitas consultas de autores em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/all")
-	public ResponseEntity<Page<AutorDTO>> retornarTodosOsAutores(@ParameterObject Pageable pageable) {
-		return ResponseEntity.ok(autorService.retornarTodosOsAutores(pageable));
+	public ResponseEntity<?> retornarTodosOsAutores(@ParameterObject Pageable pageable) {
+		Page<AutorDTO> result = autorService.retornarTodosOsAutores(pageable);
+		if (result.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(result);
 	}
 
 	@Operation(summary = "Busca autores por nome")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "A busca por autores foi realizada com sucesso."),
+			@ApiResponse(responseCode = "204", description = "Nenhum registro encontrado para esta consulta."),
 			@ApiResponse(responseCode = "400", description = "O parametro de busca informado para pesquisar autores e invalido."),
 			@ApiResponse(responseCode = "429", description = "Muitas buscas de autores em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/buscar")
-	public ResponseEntity<Page<AutorDTO>> buscarPorNome(
+	public ResponseEntity<?> buscarPorNome(
 			@RequestParam String nome, @ParameterObject Pageable pageable) {
-		return ResponseEntity.ok(autorService.buscarPorNome(nome, pageable));
+		Page<AutorDTO> result = autorService.buscarPorNome(nome, pageable);
+		if (result.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(result);
 	}
 }

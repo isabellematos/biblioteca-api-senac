@@ -83,15 +83,18 @@ public class LivroController {
 					description = "Dados do livro", required = true,
 					content = @Content(schema = @Schema(implementation = LivroCadastroDTO.class)))
 			@Valid @RequestBody LivroCadastroDTO l,
-			@RequestHeader(value = "X-Idempotency-Key", required = false) String idempotencyKey) {
+			@RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
 
-		if (idempotencyKey != null) {
-			Object cached = idempotencyService.getResponse(idempotencyKey);
-			if (cached != null) {
-				@SuppressWarnings("unchecked")
-				EntityModel<LivroDTO> cachedResource = (EntityModel<LivroDTO>) cached;
-				return ResponseEntity.ok(cachedResource);
-			}
+		if (idempotencyKey == null || idempotencyKey.isBlank()) {
+			throw new IllegalArgumentException("O header Idempotency-Key e obrigatorio e nao pode ser vazio.");
+		}
+
+		String payloadHash = String.valueOf(l.hashCode());
+		Object cached = idempotencyService.getResponse(idempotencyKey, payloadHash);
+		if (cached != null) {
+			@SuppressWarnings("unchecked")
+			EntityModel<LivroDTO> cachedResource = (EntityModel<LivroDTO>) cached;
+			return ResponseEntity.ok(cachedResource);
 		}
 
 		Livro livro = livroService.cadastrarLivro(l);
@@ -101,9 +104,7 @@ public class LivroController {
 		resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(LivroController.class).atualizarLivroId(livro.getId(), null)).withRel("update"));
 		resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(LivroController.class).deletarLivroId(livro.getId())).withRel("delete"));
 
-		if (idempotencyKey != null) {
-			idempotencyService.saveResponse(idempotencyKey, resource);
-		}
+		idempotencyService.saveResponse(idempotencyKey, payloadHash, resource);
 
 		return ResponseEntity.created(URI.create(selfLink.getHref())).body(resource);
 	}
@@ -150,35 +151,50 @@ public class LivroController {
 	@Operation(summary = "Encontra todos os livros")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "A lista de livros do acervo foi retornada com sucesso."),
+			@ApiResponse(responseCode = "204", description = "Nenhum registro encontrado para esta consulta."),
 			@ApiResponse(responseCode = "400", description = "Os parametros de paginacao informados sao invalidos."),
 			@ApiResponse(responseCode = "429", description = "Muitas consultas ao acervo em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/all")
-	public ResponseEntity<Page<LivroDTO>> retornarTodosOsLivros(@ParameterObject Pageable pageable) {
-		return ResponseEntity.ok(livroService.retornarTodosOsLivros(pageable));
+	public ResponseEntity<?> retornarTodosOsLivros(@ParameterObject Pageable pageable) {
+		Page<LivroDTO> result = livroService.retornarTodosOsLivros(pageable);
+		if (result.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(result);
 	}
 
 	@Operation(summary = "Busca livros por nome")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "A busca por livros foi realizada com sucesso."),
+			@ApiResponse(responseCode = "204", description = "Nenhum registro encontrado para esta consulta."),
 			@ApiResponse(responseCode = "400", description = "O parametro de busca informado para pesquisar livros e invalido."),
 			@ApiResponse(responseCode = "429", description = "Muitas buscas ao acervo em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/buscar")
-	public ResponseEntity<Page<LivroDTO>> buscarPorNome(
+	public ResponseEntity<?> buscarPorNome(
 			@RequestParam String nome, @ParameterObject Pageable pageable) {
-		return ResponseEntity.ok(livroService.buscarPorNome(nome, pageable));
+		Page<LivroDTO> result = livroService.buscarPorNome(nome, pageable);
+		if (result.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(result);
 	}
 
 	@Operation(summary = "Busca livros por status")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "A busca por livros filtrada por status foi realizada com sucesso."),
+			@ApiResponse(responseCode = "204", description = "Nenhum registro encontrado para esta consulta."),
 			@ApiResponse(responseCode = "400", description = "O status informado para filtrar livros e invalido. Utilize DISPONIVEL ou EMPRESTADO."),
 			@ApiResponse(responseCode = "429", description = "Muitas consultas por status em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/status")
-	public ResponseEntity<Page<LivroDTO>> buscarPorStatus(
+	public ResponseEntity<?> buscarPorStatus(
 			@RequestParam StatusLivro status, @ParameterObject Pageable pageable) {
-		return ResponseEntity.ok(livroService.buscarPorStatus(status, pageable));
+		Page<LivroDTO> result = livroService.buscarPorStatus(status, pageable);
+		if (result.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(result);
 	}
 }

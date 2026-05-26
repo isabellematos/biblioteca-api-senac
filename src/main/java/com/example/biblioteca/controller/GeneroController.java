@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.biblioteca.domain.Genero;
 import com.example.biblioteca.domain.dto.GeneroDTO;
 import com.example.biblioteca.service.GeneroService;
+import com.example.biblioteca.service.IdempotencyService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,6 +43,9 @@ public class GeneroController {
 
 	@Autowired
 	private GeneroService generoService;
+
+	@Autowired
+	private IdempotencyService idempotencyService;
 
 	@Operation(summary = "Encontra gênero por ID")
 	@ApiResponses(value = {
@@ -75,13 +80,26 @@ public class GeneroController {
 			@io.swagger.v3.oas.annotations.parameters.RequestBody(
 					description = "Dados do gênero", required = true,
 					content = @Content(schema = @Schema(implementation = GeneroDTO.class)))
-			@Valid @RequestBody GeneroDTO g) {
+			@Valid @RequestBody GeneroDTO g,
+			@RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
+		if (idempotencyKey == null || idempotencyKey.isBlank()) {
+			throw new IllegalArgumentException("O header Idempotency-Key e obrigatorio e nao pode ser vazio.");
+		}
+		String payloadHash = String.valueOf(g.hashCode());
+		Object cached = idempotencyService.getResponse(idempotencyKey, payloadHash);
+		if (cached != null) {
+			@SuppressWarnings("unchecked")
+			EntityModel<GeneroDTO> cachedResource = (EntityModel<GeneroDTO>) cached;
+			return ResponseEntity.ok(cachedResource);
+		}
+
 		Genero genero = generoService.cadastrarGenero(g);
 		EntityModel<GeneroDTO> resource = EntityModel.of(new GeneroDTO(genero));
 		Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GeneroController.class).retornarGeneroId(genero.getId())).withSelfRel();
 		resource.add(selfLink);
 		resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GeneroController.class).atualizarGeneroId(genero.getId(), null)).withRel("update"));
 		resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(GeneroController.class).deletarGeneroId(genero.getId())).withRel("delete"));
+		idempotencyService.saveResponse(idempotencyKey, payloadHash, resource);
 		return ResponseEntity.created(URI.create(selfLink.getHref())).body(resource);
 	}
 
@@ -127,23 +145,33 @@ public class GeneroController {
 	@Operation(summary = "Encontra todos os gêneros")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "A lista de generos literarios cadastrados foi retornada com sucesso."),
+			@ApiResponse(responseCode = "204", description = "Nenhum registro encontrado para esta consulta."),
 			@ApiResponse(responseCode = "400", description = "Os parametros de paginacao informados sao invalidos."),
 			@ApiResponse(responseCode = "429", description = "Muitas consultas de generos em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/all")
-	public ResponseEntity<Page<GeneroDTO>> retornarTodosOsGeneros(@ParameterObject Pageable pageable) {
-		return ResponseEntity.ok(generoService.retornarTodosOsGeneros(pageable));
+	public ResponseEntity<?> retornarTodosOsGeneros(@ParameterObject Pageable pageable) {
+		Page<GeneroDTO> result = generoService.retornarTodosOsGeneros(pageable);
+		if (result.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(result);
 	}
 
 	@Operation(summary = "Busca gêneros por nome")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "A busca por generos literarios foi realizada com sucesso."),
+			@ApiResponse(responseCode = "204", description = "Nenhum registro encontrado para esta consulta."),
 			@ApiResponse(responseCode = "400", description = "O parametro de busca informado para pesquisar generos e invalido."),
 			@ApiResponse(responseCode = "429", description = "Muitas buscas de generos em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/buscar")
-	public ResponseEntity<Page<GeneroDTO>> buscarPorNome(
+	public ResponseEntity<?> buscarPorNome(
 			@RequestParam String nome, @ParameterObject Pageable pageable) {
-		return ResponseEntity.ok(generoService.buscarPorNome(nome, pageable));
+		Page<GeneroDTO> result = generoService.buscarPorNome(nome, pageable);
+		if (result.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(result);
 	}
 }

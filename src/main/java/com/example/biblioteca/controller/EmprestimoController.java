@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +25,7 @@ import com.example.biblioteca.domain.dto.EmprestimoCadastroDTO;
 import com.example.biblioteca.domain.dto.EmprestimoDTO;
 import com.example.biblioteca.domain.enums.StatusEmprestimo;
 import com.example.biblioteca.service.EmprestimoService;
+import com.example.biblioteca.service.IdempotencyService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -43,6 +45,9 @@ public class EmprestimoController {
 	@Autowired
 	private EmprestimoService emprestimoService;
 
+	@Autowired
+	private IdempotencyService idempotencyService;
+
 	@Operation(summary = "Realiza um emprestimo de livro")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "201", description = "Novo emprestimo realizado com sucesso na biblioteca."),
@@ -57,13 +62,26 @@ public class EmprestimoController {
 			@io.swagger.v3.oas.annotations.parameters.RequestBody(
 					description = "Dados do emprestimo", required = true,
 					content = @Content(schema = @Schema(implementation = EmprestimoCadastroDTO.class)))
-			@Valid @RequestBody EmprestimoCadastroDTO dto) {
+			@Valid @RequestBody EmprestimoCadastroDTO dto,
+			@RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
+		if (idempotencyKey == null || idempotencyKey.isBlank()) {
+			throw new IllegalArgumentException("O header Idempotency-Key e obrigatorio e nao pode ser vazio.");
+		}
+		String payloadHash = String.valueOf(dto.hashCode());
+		Object cached = idempotencyService.getResponse(idempotencyKey, payloadHash);
+		if (cached != null) {
+			@SuppressWarnings("unchecked")
+			EntityModel<EmprestimoDTO> cachedResource = (EntityModel<EmprestimoDTO>) cached;
+			return ResponseEntity.ok(cachedResource);
+		}
+
 		Emprestimo emprestimo = emprestimoService.realizarEmprestimo(dto);
 		EmprestimoDTO emprestimoDTO = new EmprestimoDTO(emprestimo);
 		EntityModel<EmprestimoDTO> resource = EntityModel.of(emprestimoDTO);
 		Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EmprestimoController.class).retornarEmprestimoId(emprestimo.getId())).withSelfRel();
 		resource.add(selfLink);
 		resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(EmprestimoController.class).realizarDevolucao(emprestimo.getId())).withRel("devolver"));
+		idempotencyService.saveResponse(idempotencyKey, payloadHash, resource);
 		return ResponseEntity.created(URI.create(selfLink.getHref())).body(resource);
 	}
 
@@ -107,38 +125,53 @@ public class EmprestimoController {
 	@Operation(summary = "Lista todos os emprestimos")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "A lista de emprestimos registrados foi retornada com sucesso."),
+			@ApiResponse(responseCode = "204", description = "Nenhum registro encontrado para esta consulta."),
 			@ApiResponse(responseCode = "400", description = "Os parametros de paginacao informados sao invalidos."),
 			@ApiResponse(responseCode = "429", description = "Muitas consultas de emprestimos em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/all")
-	public ResponseEntity<Page<EmprestimoDTO>> retornarTodosOsEmprestimos(@ParameterObject Pageable pageable) {
-		return ResponseEntity.ok(emprestimoService.retornarTodosOsEmprestimos(pageable));
+	public ResponseEntity<?> retornarTodosOsEmprestimos(@ParameterObject Pageable pageable) {
+		Page<EmprestimoDTO> result = emprestimoService.retornarTodosOsEmprestimos(pageable);
+		if (result.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(result);
 	}
 
 	@Operation(summary = "Busca emprestimos por usuario")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "A busca por emprestimos do usuario foi realizada com sucesso."),
+			@ApiResponse(responseCode = "204", description = "Nenhum registro encontrado para esta consulta."),
 			@ApiResponse(responseCode = "400", description = "O ID do usuario informado para buscar emprestimos e invalido."),
 			@ApiResponse(responseCode = "429", description = "Muitas buscas de emprestimos em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/usuario/{usuarioId}")
-	public ResponseEntity<Page<EmprestimoDTO>> buscarPorUsuario(
+	public ResponseEntity<?> buscarPorUsuario(
 			@Parameter(description = "ID do usuario") @PathVariable Integer usuarioId,
 			@ParameterObject Pageable pageable) {
-		return ResponseEntity.ok(emprestimoService.buscarPorUsuario(usuarioId, pageable));
+		Page<EmprestimoDTO> result = emprestimoService.buscarPorUsuario(usuarioId, pageable);
+		if (result.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(result);
 	}
 
 	@Operation(summary = "Busca emprestimos por status")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "A busca por emprestimos filtrada por status foi realizada com sucesso."),
+			@ApiResponse(responseCode = "204", description = "Nenhum registro encontrado para esta consulta."),
 			@ApiResponse(responseCode = "400", description = "O status informado para filtrar emprestimos e invalido. Utilize ATIVO ou DEVOLVIDO."),
 			@ApiResponse(responseCode = "429", description = "Muitas buscas de emprestimos por status em sequencia. Aguarde antes de tentar novamente."),
 	})
 	@GetMapping("/status")
-	public ResponseEntity<Page<EmprestimoDTO>> buscarPorStatus(
+	public ResponseEntity<?> buscarPorStatus(
 			@RequestParam StatusEmprestimo status,
 			@ParameterObject Pageable pageable) {
-		return ResponseEntity.ok(emprestimoService.buscarPorStatus(status, pageable));
+		Page<EmprestimoDTO> result = emprestimoService.buscarPorStatus(status, pageable);
+		if (result.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(result);
 	}
 
 	@Operation(summary = "Deleta um emprestimo por ID")
