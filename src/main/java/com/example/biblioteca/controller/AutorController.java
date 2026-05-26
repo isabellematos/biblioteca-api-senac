@@ -1,6 +1,7 @@
 package com.example.biblioteca.controller;
 
 import java.net.URI;
+import java.util.UUID;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +84,7 @@ public class AutorController {
 			@Valid @RequestBody AutorDTO a,
 			@RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
 		if (idempotencyKey == null || idempotencyKey.isBlank()) {
-			throw new IllegalArgumentException("O header Idempotency-Key e obrigatorio e nao pode ser vazio.");
+			idempotencyKey = UUID.randomUUID().toString();
 		}
 		String payloadHash = String.valueOf(a.hashCode());
 		Object cached = idempotencyService.getResponse(idempotencyKey, payloadHash);
