@@ -206,7 +206,11 @@
             el.classList.add('active');
             if (id === 'acervo') listarLivros();
             else if (id === 'emprestimos') listarEmprestimos();
-            else listarSimples(id.replace('s','').replace('ore','or').replace('era','era'));
+            else if (id === 'autores') listarSimples('autor');
+            else if (id === 'editoras') listarSimples('editora');
+            else if (id === 'generos') listarSimples('genero');
+            else if (id === 'idiomas') listarSimples('idioma');
+            else if (id === 'usuarios') listarSimples('usuario');
         }
 
         function showMsg(text, ok) {
@@ -225,11 +229,11 @@
         async function listarSimples(entidade) {
             const res = await fetch(getBase() + '/' + entidade + '/all');
             const data = await res.json();
-            const grid = document.getElementById(entidade + 's-grid') || document.getElementById(entidade + 'es-grid');
-            const gridEl = document.getElementById(entidade + 's-grid');
+            const gridId = entidade === 'autor' ? 'autores-grid' : entidade + 's-grid';
+            const gridEl = document.getElementById(gridId);
             if (!gridEl) return;
             if (!data.content || data.content.length === 0) { gridEl.innerHTML = '<div class="empty">Nenhum registro.</div>'; return; }
-            gridEl.innerHTML = data.content.map(i => `<div class="item-card"><h3>${i.nome || i.usuarioNome || '-'}</h3><p>ID: ${i.id}</p>${i.email ? '<p>Email: '+i.email+'</p>' : ''}${i.nacionalidade ? '<p>Nacionalidade: '+i.nacionalidade+'</p>' : ''}${i.detalhesAutor ? '<p>Nacionalidade: '+i.detalhesAutor.nacionalidade+'</p>' : ''}<div class="actions"><button class="btn-del" onclick="deletar('${entidade}',${i.id})">Excluir</button></div></div>`).join('');
+            gridEl.innerHTML = data.content.map(i => `<div class="item-card"><h3>${i.nome || '-'}</h3><p>ID: ${i.id}</p>${i.email ? '<p>Email: '+i.email+'</p>' : ''}${i.telefone ? '<p>Telefone: '+i.telefone+'</p>' : ''}${i.detalhesAutor ? '<p>Nacionalidade: '+i.detalhesAutor.nacionalidade+'</p>' : ''}<div class="actions"><button class="btn-del" onclick="deletar('${entidade}',${i.id})">Excluir</button></div></div>`).join('');
         }
 
         async function listarEmprestimos() {
