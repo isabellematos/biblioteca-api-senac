@@ -192,11 +192,11 @@
         }
 
         async function gerarKey() {
-            const res = await fetch(getBase() + '/api-keys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ descricao: 'Gerada pelo front' }) });
+            const res = await fetch(getBase() + '/api-keys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ owner: 'Front-end App', accessLevel: 'ADMIN' }) });
             const data = await res.json();
-            document.getElementById('api-key-input').value = data.chave;
+            document.getElementById('api-key-input').value = data.keyValue;
             aplicarKey();
-            showMsg('Chave gerada: ' + data.chave, true);
+            showMsg('Chave gerada: ' + data.keyValue, true);
         }
 
         function trocar(id, el) {
