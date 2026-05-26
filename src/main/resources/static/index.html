@@ -3,253 +3,298 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biblioteca</title>
+    <title>Biblioteca API</title>
     <style>
-        :root { --cor-principal: #2c3e50; --cor-accent: #3498db; --cor-fundo: #ecf0f1; --cor-card: #fff; --cor-texto: #333; --cor-sucesso: #27ae60; --cor-erro: #c0392b; }
-        * { box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--cor-fundo); color: var(--cor-texto); margin: 0; padding: 0; }
-        header { background: var(--cor-principal); color: #fff; padding: 15px 30px; display: flex; align-items: center; justify-content: space-between; }
-        header h1 { font-size: 20px; font-weight: 600; margin: 0; }
-        header small { opacity: 0.7; font-size: 12px; }
-        .wrapper { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
-        nav { display: flex; gap: 8px; margin-bottom: 25px; flex-wrap: wrap; }
-        nav button { padding: 9px 18px; border: 2px solid var(--cor-principal); background: transparent; color: var(--cor-principal); border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; }
-        nav button:hover, nav button.active { background: var(--cor-principal); color: #fff; }
+        :root { --principal: #1a2332; --accent: #4a90d9; --fundo: #f0f2f5; --card: #fff; --texto: #333; --sucesso: #28a745; --erro: #dc3545; --borda: #dee2e6; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--fundo); color: var(--texto); }
+        header { background: var(--principal); color: #fff; padding: 20px 30px; }
+        header h1 { font-size: 22px; margin-bottom: 5px; }
+        header a { color: var(--accent); text-decoration: none; font-size: 13px; }
+        .api-bar { background: #fff; border-bottom: 1px solid var(--borda); padding: 12px 30px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .api-bar label { font-size: 12px; font-weight: 600; color: #666; }
+        .api-bar input { padding: 7px 12px; border: 1px solid var(--borda); border-radius: 4px; font-size: 13px; width: 320px; }
+        .api-bar button { padding: 7px 16px; background: var(--accent); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; }
+        .api-bar .status { font-size: 12px; padding: 4px 10px; border-radius: 12px; }
+        .status.on { background: #d4edda; color: var(--sucesso); }
+        .status.off { background: #f8d7da; color: var(--erro); }
+        nav { background: #fff; border-bottom: 1px solid var(--borda); padding: 0 30px; display: flex; gap: 0; overflow-x: auto; }
+        nav a { padding: 12px 18px; font-size: 13px; color: #666; text-decoration: none; border-bottom: 2px solid transparent; white-space: nowrap; }
+        nav a:hover, nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .container { max-width: 1100px; margin: 25px auto; padding: 0 20px; }
         .section { display: none; }
         .section.active { display: block; }
-        .card { background: var(--cor-card); border-radius: 8px; padding: 25px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-        .card h2 { margin: 0 0 18px 0; font-size: 18px; color: var(--cor-principal); border-bottom: 2px solid var(--cor-fundo); padding-bottom: 10px; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .form-grid.single { grid-template-columns: 1fr; }
-        .field { display: flex; flex-direction: column; }
-        .field label { font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #555; text-transform: uppercase; letter-spacing: 0.5px; }
-        .field input, .field select { padding: 9px 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; transition: border 0.2s; }
-        .field input:focus, .field select:focus { outline: none; border-color: var(--cor-accent); }
-        .actions { margin-top: 15px; display: flex; gap: 10px; }
-        .btn { padding: 9px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: 500; transition: opacity 0.2s; }
-        .btn:hover { opacity: 0.85; }
-        .btn-primary { background: var(--cor-accent); color: #fff; }
-        .btn-secondary { background: #95a5a6; color: #fff; }
-        .output { margin-top: 20px; }
-        .alert { padding: 12px 15px; border-radius: 5px; margin-bottom: 10px; font-size: 13px; }
-        .alert-ok { background: #d5f5e3; color: var(--cor-sucesso); }
-        .alert-err { background: #fadbd8; color: var(--cor-erro); }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th { background: var(--cor-principal); color: #fff; padding: 10px 12px; text-align: left; font-weight: 500; }
-        td { padding: 9px 12px; border-bottom: 1px solid #eee; }
-        tr:hover td { background: #f7f9fa; }
-        @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+        .toolbar { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; }
+        .toolbar input { padding: 8px 12px; border: 1px solid var(--borda); border-radius: 4px; font-size: 13px; flex: 1; min-width: 200px; }
+        .toolbar button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; }
+        .btn-new { background: var(--sucesso); color: #fff; }
+        .btn-search { background: var(--accent); color: #fff; }
+        .btn-clear { background: #6c757d; color: #fff; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        .item-card { background: var(--card); border: 1px solid var(--borda); border-radius: 8px; padding: 16px; }
+        .item-card .tag { font-size: 11px; background: #e9ecef; padding: 2px 8px; border-radius: 10px; color: #555; display: inline-block; margin-bottom: 8px; }
+        .item-card h3 { font-size: 15px; margin-bottom: 6px; }
+        .item-card p { font-size: 12px; color: #666; margin-bottom: 3px; }
+        .item-card .actions { margin-top: 10px; display: flex; gap: 8px; }
+        .item-card .actions button { padding: 5px 12px; font-size: 11px; border: none; border-radius: 3px; cursor: pointer; }
+        .btn-edit { background: #ffc107; color: #333; }
+        .btn-del { background: var(--erro); color: #fff; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; }
+        .modal.show { display: flex; }
+        .modal-content { background: #fff; border-radius: 8px; padding: 25px; width: 90%; max-width: 500px; }
+        .modal-content h2 { margin-bottom: 15px; font-size: 18px; }
+        .modal-content .field { margin-bottom: 12px; }
+        .modal-content label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #555; }
+        .modal-content input, .modal-content select { width: 100%; padding: 8px 12px; border: 1px solid var(--borda); border-radius: 4px; font-size: 14px; }
+        .modal-content .btns { display: flex; gap: 10px; margin-top: 15px; }
+        .modal-content .btns button { padding: 9px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; }
+        .btn-save { background: var(--sucesso); color: #fff; }
+        .btn-cancel { background: #6c757d; color: #fff; }
+        .alert { padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 13px; }
+        .alert-ok { background: #d4edda; color: var(--sucesso); }
+        .alert-err { background: #f8d7da; color: var(--erro); }
+        .empty { text-align: center; padding: 40px; color: #999; font-size: 14px; }
     </style>
 </head>
 <body>
     <header>
-        <div><h1>Biblioteca</h1><small>Sistema de gerenciamento</small></div>
+        <h1>Biblioteca API</h1>
+        <a href="/swagger-ui/index.html" target="_blank">Swagger</a>
     </header>
 
-    <div class="wrapper">
-        <nav>
-            <button class="active" onclick="trocarAba('livros', this)">Livros</button>
-            <button onclick="trocarAba('autores', this)">Autores</button>
-            <button onclick="trocarAba('editoras', this)">Editoras</button>
-            <button onclick="trocarAba('generos', this)">Generos</button>
-            <button onclick="trocarAba('idiomas', this)">Idiomas</button>
-            <button onclick="trocarAba('usuarios', this)">Usuarios</button>
-            <button onclick="trocarAba('emprestimos', this)">Emprestimos</button>
-        </nav>
+    <div class="api-bar">
+        <label>Base da API</label>
+        <input id="base-url" value="" placeholder="URL base (deixe vazio para mesma origem)" style="width:250px">
+        <label>X-API-Key</label>
+        <input id="api-key-input" placeholder="Cole sua chave aqui">
+        <button onclick="aplicarKey()">Aplicar</button>
+        <span id="key-status" class="status off">Sem chave</span>
+        <button onclick="gerarKey()" style="background:#6c757d">Gerar nova</button>
+    </div>
 
-        <!-- LIVROS -->
-        <div id="livros" class="section active">
-            <div class="card">
-                <h2>Cadastrar livro</h2>
-                <form onsubmit="cadastrarLivro(event)">
-                    <div class="form-grid">
-                        <div class="field"><label>Nome</label><input id="l-nome" required></div>
-                        <div class="field"><label>ISBN</label><input id="l-isbn" required></div>
-                        <div class="field"><label>Descricao</label><input id="l-desc" required></div>
-                        <div class="field"><label>Paginas</label><input type="number" id="l-pag" required></div>
-                        <div class="field"><label>Editora ID</label><input type="number" id="l-ed" required></div>
-                        <div class="field"><label>Genero ID</label><input type="number" id="l-gen" required></div>
-                        <div class="field"><label>Idioma ID</label><input type="number" id="l-idi" required></div>
-                        <div class="field"><label>Autor IDs (virgula)</label><input id="l-aut" required></div>
-                        <div class="field"><label>Status</label>
-                            <select id="l-status"><option>DISPONIVEL</option><option>EMPRESTADO</option><option>RESERVADO</option></select>
-                        </div>
-                    </div>
-                    <div class="actions"><button type="submit" class="btn btn-primary">Cadastrar</button><button type="button" class="btn btn-secondary" onclick="listar('livro','livros-out')">Listar todos</button></div>
-                </form>
+    <nav>
+        <a href="#" class="active" onclick="trocar('acervo',this)">Acervo</a>
+        <a href="#" onclick="trocar('autores',this)">Autores</a>
+        <a href="#" onclick="trocar('editoras',this)">Editoras</a>
+        <a href="#" onclick="trocar('generos',this)">Generos</a>
+        <a href="#" onclick="trocar('idiomas',this)">Idiomas</a>
+        <a href="#" onclick="trocar('usuarios',this)">Usuarios</a>
+        <a href="#" onclick="trocar('emprestimos',this)">Emprestimos</a>
+    </nav>
+
+    <div class="container">
+        <div id="msg"></div>
+
+        <!-- ACERVO -->
+        <div id="acervo" class="section active">
+            <div class="toolbar">
+                <button class="btn-new" onclick="abrirModal('livro')">Novo livro</button>
+                <input id="busca-livro" placeholder="Buscar por nome...">
+                <button class="btn-search" onclick="buscar('livro')">Buscar</button>
+                <button class="btn-clear" onclick="listarLivros()">Limpar</button>
             </div>
-            <div id="livros-out" class="output"></div>
+            <div id="livros-grid" class="grid"></div>
         </div>
 
         <!-- AUTORES -->
         <div id="autores" class="section">
-            <div class="card">
-                <h2>Cadastrar autor</h2>
-                <form onsubmit="cadastrarAutor(event)">
-                    <div class="form-grid">
-                        <div class="field"><label>Nome</label><input id="a-nome" required></div>
-                        <div class="field"><label>Nacionalidade</label><input id="a-nac" required></div>
-                    </div>
-                    <div class="actions"><button type="submit" class="btn btn-primary">Cadastrar</button><button type="button" class="btn btn-secondary" onclick="listar('autor','autores-out')">Listar todos</button></div>
-                </form>
+            <div class="toolbar">
+                <button class="btn-new" onclick="abrirModal('autor')">Novo autor</button>
+                <input id="busca-autor" placeholder="Buscar por nome...">
+                <button class="btn-search" onclick="buscar('autor')">Buscar</button>
+                <button class="btn-clear" onclick="listarSimples('autor')">Limpar</button>
             </div>
-            <div id="autores-out" class="output"></div>
+            <div id="autores-grid" class="grid"></div>
         </div>
 
         <!-- EDITORAS -->
         <div id="editoras" class="section">
-            <div class="card">
-                <h2>Cadastrar editora</h2>
-                <form onsubmit="cadastrarSimples(event,'editora','ed-nome','editoras-out')">
-                    <div class="form-grid single"><div class="field"><label>Nome</label><input id="ed-nome" required></div></div>
-                    <div class="actions"><button type="submit" class="btn btn-primary">Cadastrar</button><button type="button" class="btn btn-secondary" onclick="listar('editora','editoras-out')">Listar todas</button></div>
-                </form>
+            <div class="toolbar">
+                <button class="btn-new" onclick="abrirModal('editora')">Nova editora</button>
+                <input id="busca-editora" placeholder="Buscar por nome...">
+                <button class="btn-search" onclick="buscar('editora')">Buscar</button>
+                <button class="btn-clear" onclick="listarSimples('editora')">Limpar</button>
             </div>
-            <div id="editoras-out" class="output"></div>
+            <div id="editoras-grid" class="grid"></div>
         </div>
 
         <!-- GENEROS -->
         <div id="generos" class="section">
-            <div class="card">
-                <h2>Cadastrar genero</h2>
-                <form onsubmit="cadastrarSimples(event,'genero','g-nome','generos-out')">
-                    <div class="form-grid single"><div class="field"><label>Nome</label><input id="g-nome" required></div></div>
-                    <div class="actions"><button type="submit" class="btn btn-primary">Cadastrar</button><button type="button" class="btn btn-secondary" onclick="listar('genero','generos-out')">Listar todos</button></div>
-                </form>
+            <div class="toolbar">
+                <button class="btn-new" onclick="abrirModal('genero')">Novo genero</button>
+                <input id="busca-genero" placeholder="Buscar por nome...">
+                <button class="btn-search" onclick="buscar('genero')">Buscar</button>
+                <button class="btn-clear" onclick="listarSimples('genero')">Limpar</button>
             </div>
-            <div id="generos-out" class="output"></div>
+            <div id="generos-grid" class="grid"></div>
         </div>
 
         <!-- IDIOMAS -->
         <div id="idiomas" class="section">
-            <div class="card">
-                <h2>Cadastrar idioma</h2>
-                <form onsubmit="cadastrarSimples(event,'idioma','i-nome','idiomas-out')">
-                    <div class="form-grid single"><div class="field"><label>Nome</label><input id="i-nome" required></div></div>
-                    <div class="actions"><button type="submit" class="btn btn-primary">Cadastrar</button><button type="button" class="btn btn-secondary" onclick="listar('idioma','idiomas-out')">Listar todos</button></div>
-                </form>
+            <div class="toolbar">
+                <button class="btn-new" onclick="abrirModal('idioma')">Novo idioma</button>
+                <input id="busca-idioma" placeholder="Buscar por nome...">
+                <button class="btn-search" onclick="buscar('idioma')">Buscar</button>
+                <button class="btn-clear" onclick="listarSimples('idioma')">Limpar</button>
             </div>
-            <div id="idiomas-out" class="output"></div>
+            <div id="idiomas-grid" class="grid"></div>
         </div>
 
         <!-- USUARIOS -->
         <div id="usuarios" class="section">
-            <div class="card">
-                <h2>Cadastrar usuario</h2>
-                <form onsubmit="cadastrarUsuario(event)">
-                    <div class="form-grid">
-                        <div class="field"><label>Nome</label><input id="u-nome" required></div>
-                        <div class="field"><label>Email</label><input type="email" id="u-email" required></div>
-                        <div class="field"><label>Telefone</label><input id="u-tel" required></div>
-                    </div>
-                    <div class="actions"><button type="submit" class="btn btn-primary">Cadastrar</button><button type="button" class="btn btn-secondary" onclick="listar('usuario','usuarios-out')">Listar todos</button></div>
-                </form>
+            <div class="toolbar">
+                <button class="btn-new" onclick="abrirModal('usuario')">Novo usuario</button>
+                <input id="busca-usuario" placeholder="Buscar por nome...">
+                <button class="btn-search" onclick="buscar('usuario')">Buscar</button>
+                <button class="btn-clear" onclick="listarSimples('usuario')">Limpar</button>
             </div>
-            <div id="usuarios-out" class="output"></div>
+            <div id="usuarios-grid" class="grid"></div>
         </div>
 
         <!-- EMPRESTIMOS -->
         <div id="emprestimos" class="section">
-            <div class="card">
-                <h2>Realizar emprestimo</h2>
-                <form onsubmit="realizarEmprestimo(event)">
-                    <div class="form-grid">
-                        <div class="field"><label>Usuario ID</label><input type="number" id="e-uid" required></div>
-                        <div class="field"><label>Livro ID</label><input type="number" id="e-lid" required></div>
-                        <div class="field"><label>Dias para devolucao</label><input type="number" id="e-dias" value="14"></div>
-                    </div>
-                    <div class="actions"><button type="submit" class="btn btn-primary">Emprestar</button><button type="button" class="btn btn-secondary" onclick="listar('emprestimo','emprestimos-out')">Listar todos</button></div>
-                </form>
+            <div class="toolbar">
+                <button class="btn-new" onclick="abrirModal('emprestimo')">Novo emprestimo</button>
+                <button class="btn-clear" onclick="listarEmprestimos()">Listar todos</button>
             </div>
-            <div id="emprestimos-out" class="output"></div>
+            <div id="emprestimos-grid" class="grid"></div>
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title">Cadastrar</h2>
+            <div id="modal-fields"></div>
+            <div class="btns">
+                <button class="btn-save" onclick="salvarModal()">Salvar</button>
+                <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+            </div>
         </div>
     </div>
 
     <script>
-        const API_KEY = localStorage.getItem('apiKey') || '';
+        let apiKey = localStorage.getItem('apiKey') || '';
+        let modalType = '';
 
-        function headers() {
+        function getBase() { return document.getElementById('base-url').value || ''; }
+        function headers(withKey) {
             const h = { 'Content-Type': 'application/json' };
-            if (API_KEY) h['X-API-Key'] = API_KEY;
+            if (withKey && apiKey) h['X-API-Key'] = apiKey;
             return h;
         }
 
-        function trocarAba(id, btn) {
+        function aplicarKey() {
+            apiKey = document.getElementById('api-key-input').value.trim();
+            localStorage.setItem('apiKey', apiKey);
+            document.getElementById('key-status').className = 'status on';
+            document.getElementById('key-status').textContent = 'X-API-Key ativa';
+        }
+
+        async function gerarKey() {
+            const res = await fetch(getBase() + '/api-keys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ descricao: 'Gerada pelo front' }) });
+            const data = await res.json();
+            document.getElementById('api-key-input').value = data.chave;
+            aplicarKey();
+            showMsg('Chave gerada: ' + data.chave, true);
+        }
+
+        function trocar(id, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            btn.classList.add('active');
+            el.classList.add('active');
+            if (id === 'acervo') listarLivros();
+            else if (id === 'emprestimos') listarEmprestimos();
+            else listarSimples(id.replace('s','').replace('ore','or').replace('era','era'));
         }
 
-        function msg(container, text, ok) {
-            document.getElementById(container).innerHTML = '<div class="alert ' + (ok ? 'alert-ok' : 'alert-err') + '">' + text + '</div>';
+        function showMsg(text, ok) {
+            document.getElementById('msg').innerHTML = '<div class="alert ' + (ok ? 'alert-ok' : 'alert-err') + '">' + text + '</div>';
+            setTimeout(() => document.getElementById('msg').innerHTML = '', 4000);
         }
 
-        async function cadastrarSimples(e, entidade, inputId, outId) {
-            e.preventDefault();
-            const nome = document.getElementById(inputId).value;
-            const res = await fetch('/' + entidade, { method: 'POST', headers: headers(), body: JSON.stringify({ nome }) });
+        async function listarLivros() {
+            const res = await fetch(getBase() + '/livro/all');
             const data = await res.json();
-            if (res.ok) { msg(outId, 'Cadastrado! ID: ' + data.id, true); document.getElementById(inputId).value = ''; }
-            else msg(outId, data.mensagem || JSON.stringify(data), false);
+            const grid = document.getElementById('livros-grid');
+            if (!data.content || data.content.length === 0) { grid.innerHTML = '<div class="empty">Nenhum livro cadastrado.</div>'; return; }
+            grid.innerHTML = data.content.map(l => `<div class="item-card"><span class="tag">${l.status || 'DISPONIVEL'}</span><h3>${l.nome}</h3><p>ID: ${l.id}</p><p>Editora: ${l.editoraNome || '-'}</p><p>Genero: ${l.generoNome || '-'}</p><p>Autores: ${l.autoresNomes ? l.autoresNomes.join(', ') : '-'}</p><div class="actions"><button class="btn-del" onclick="deletar('livro',${l.id})">Excluir</button></div></div>`).join('');
         }
 
-        async function cadastrarAutor(e) {
-            e.preventDefault();
-            const body = { nome: document.getElementById('a-nome').value, detalhesAutor: { nacionalidade: document.getElementById('a-nac').value } };
-            const res = await fetch('/autor', { method: 'POST', headers: headers(), body: JSON.stringify(body) });
+        async function listarSimples(entidade) {
+            const res = await fetch(getBase() + '/' + entidade + '/all');
             const data = await res.json();
-            if (res.ok) { msg('autores-out', 'Cadastrado! ID: ' + data.id, true); document.getElementById('a-nome').value = ''; document.getElementById('a-nac').value = ''; }
-            else msg('autores-out', data.mensagem || JSON.stringify(data), false);
+            const grid = document.getElementById(entidade + 's-grid') || document.getElementById(entidade + 'es-grid');
+            const gridEl = document.getElementById(entidade + 's-grid');
+            if (!gridEl) return;
+            if (!data.content || data.content.length === 0) { gridEl.innerHTML = '<div class="empty">Nenhum registro.</div>'; return; }
+            gridEl.innerHTML = data.content.map(i => `<div class="item-card"><h3>${i.nome || i.usuarioNome || '-'}</h3><p>ID: ${i.id}</p>${i.email ? '<p>Email: '+i.email+'</p>' : ''}${i.nacionalidade ? '<p>Nacionalidade: '+i.nacionalidade+'</p>' : ''}${i.detalhesAutor ? '<p>Nacionalidade: '+i.detalhesAutor.nacionalidade+'</p>' : ''}<div class="actions"><button class="btn-del" onclick="deletar('${entidade}',${i.id})">Excluir</button></div></div>`).join('');
         }
 
-        async function cadastrarUsuario(e) {
-            e.preventDefault();
-            const body = { nome: document.getElementById('u-nome').value, email: document.getElementById('u-email').value, telefone: document.getElementById('u-tel').value };
-            const res = await fetch('/usuario', { method: 'POST', headers: headers(), body: JSON.stringify(body) });
+        async function listarEmprestimos() {
+            const res = await fetch(getBase() + '/emprestimo/all');
             const data = await res.json();
-            if (res.ok) { msg('usuarios-out', 'Cadastrado! ID: ' + data.id, true); }
-            else msg('usuarios-out', data.mensagem || JSON.stringify(data), false);
+            const grid = document.getElementById('emprestimos-grid');
+            if (!data.content || data.content.length === 0) { grid.innerHTML = '<div class="empty">Nenhum emprestimo registrado.</div>'; return; }
+            grid.innerHTML = data.content.map(e => `<div class="item-card"><span class="tag">${e.status}</span><h3>${e.livroNome}</h3><p>ID: ${e.id}</p><p>Usuario: ${e.usuarioNome}</p><p>Emprestimo: ${e.dataEmprestimo}</p><p>Devolucao prevista: ${e.dataDevolucaoPrevista}</p>${e.dataDevolucaoReal ? '<p>Devolvido: '+e.dataDevolucaoReal+'</p>' : ''}<div class="actions">${e.status==='ATIVO'?'<button class="btn-edit" onclick="devolver('+e.id+')">Devolver</button>':''}<button class="btn-del" onclick="deletar(\'emprestimo\',${e.id})">Excluir</button></div></div>`).join('');
         }
 
-        async function cadastrarLivro(e) {
-            e.preventDefault();
-            const body = {
-                nome: document.getElementById('l-nome').value,
-                descricao: document.getElementById('l-desc').value,
-                isbn: document.getElementById('l-isbn').value,
-                numPaginas: parseInt(document.getElementById('l-pag').value),
-                editoraId: parseInt(document.getElementById('l-ed').value),
-                generoId: parseInt(document.getElementById('l-gen').value),
-                idiomaId: parseInt(document.getElementById('l-idi').value),
-                autoresId: document.getElementById('l-aut').value.split(',').map(s => parseInt(s.trim())),
-                status: document.getElementById('l-status').value
-            };
-            const res = await fetch('/livro', { method: 'POST', headers: headers(), body: JSON.stringify(body) });
+        async function buscar(entidade) {
+            const termo = document.getElementById('busca-' + entidade).value;
+            if (!termo) return;
+            const res = await fetch(getBase() + '/' + entidade + '/buscar?nome=' + encodeURIComponent(termo));
             const data = await res.json();
-            if (res.ok) msg('livros-out', 'Cadastrado! ID: ' + data.id, true);
-            else msg('livros-out', data.mensagem || JSON.stringify(data), false);
+            const grid = document.getElementById(entidade + 's-grid') || document.getElementById(entidade + '-grid');
+            if (entidade === 'livro') { document.getElementById('livros-grid').innerHTML = (!data.content||data.content.length===0) ? '<div class="empty">Nenhum resultado.</div>' : data.content.map(l => `<div class="item-card"><span class="tag">${l.status||'DISPONIVEL'}</span><h3>${l.nome}</h3><p>ID: ${l.id}</p></div>`).join(''); }
+            else { const g = document.getElementById(entidade+'s-grid'); if(g) g.innerHTML = (!data.content||data.content.length===0) ? '<div class="empty">Nenhum resultado.</div>' : data.content.map(i => `<div class="item-card"><h3>${i.nome||'-'}</h3><p>ID: ${i.id}</p></div>`).join(''); }
         }
 
-        async function realizarEmprestimo(e) {
-            e.preventDefault();
-            const body = { usuarioId: parseInt(document.getElementById('e-uid').value), livroId: parseInt(document.getElementById('e-lid').value), diasParaDevolucao: parseInt(document.getElementById('e-dias').value) };
-            const res = await fetch('/emprestimo', { method: 'POST', headers: headers(), body: JSON.stringify(body) });
-            const data = await res.json();
-            if (res.ok) msg('emprestimos-out', 'Emprestimo realizado! ID: ' + data.id, true);
-            else msg('emprestimos-out', data.mensagem || JSON.stringify(data), false);
+        async function deletar(entidade, id) {
+            if (!confirm('Tem certeza?')) return;
+            const res = await fetch(getBase() + '/' + entidade + '/' + id, { method: 'DELETE', headers: headers(true) });
+            if (res.ok) { showMsg('Removido com sucesso!', true); if(entidade==='livro') listarLivros(); else if(entidade==='emprestimo') listarEmprestimos(); else listarSimples(entidade); }
+            else { const d = await res.json().catch(()=>({})); showMsg(d.mensagem || 'Erro ao remover', false); }
         }
 
-        async function listar(entidade, outId) {
-            const res = await fetch('/' + entidade + '/all');
-            const data = await res.json();
-            if (!data.content || data.content.length === 0) { document.getElementById(outId).innerHTML = '<div class="alert">Nenhum registro.</div>'; return; }
-            const keys = Object.keys(data.content[0]).filter(k => !k.startsWith('_') && k !== 'links');
-            let html = '<table><tr>' + keys.map(k => '<th>' + k + '</th>').join('') + '</tr>';
-            data.content.forEach(item => { html += '<tr>' + keys.map(k => { const v = item[k]; return '<td>' + (Array.isArray(v) ? v.join(', ') : (v != null ? v : '-')) + '</td>'; }).join('') + '</tr>'; });
-            html += '</table>';
-            document.getElementById(outId).innerHTML = html;
+        async function devolver(id) {
+            const res = await fetch(getBase() + '/emprestimo/' + id + '/devolver', { method: 'POST', headers: headers(true) });
+            if (res.ok) { showMsg('Livro devolvido!', true); listarEmprestimos(); }
+            else { const d = await res.json().catch(()=>({})); showMsg(d.mensagem || 'Erro na devolucao', false); }
         }
+
+        function abrirModal(type) {
+            modalType = type;
+            const m = document.getElementById('modal');
+            const title = document.getElementById('modal-title');
+            const fields = document.getElementById('modal-fields');
+            title.textContent = 'Cadastrar ' + type;
+            if (type === 'livro') fields.innerHTML = '<div class="field"><label>Nome</label><input id="m-nome"></div><div class="field"><label>Descricao</label><input id="m-desc"></div><div class="field"><label>ISBN</label><input id="m-isbn"></div><div class="field"><label>Paginas</label><input type="number" id="m-pag"></div><div class="field"><label>Editora ID</label><input type="number" id="m-ed"></div><div class="field"><label>Genero ID</label><input type="number" id="m-gen"></div><div class="field"><label>Idioma ID</label><input type="number" id="m-idi"></div><div class="field"><label>Autor IDs (virgula)</label><input id="m-aut"></div><div class="field"><label>Status</label><select id="m-status"><option>DISPONIVEL</option><option>EMPRESTADO</option><option>RESERVADO</option></select></div>';
+            else if (type === 'autor') fields.innerHTML = '<div class="field"><label>Nome</label><input id="m-nome"></div><div class="field"><label>Nacionalidade</label><input id="m-nac"></div>';
+            else if (type === 'usuario') fields.innerHTML = '<div class="field"><label>Nome</label><input id="m-nome"></div><div class="field"><label>Email</label><input id="m-email"></div><div class="field"><label>Telefone</label><input id="m-tel"></div>';
+            else if (type === 'emprestimo') fields.innerHTML = '<div class="field"><label>Usuario ID</label><input type="number" id="m-uid"></div><div class="field"><label>Livro ID</label><input type="number" id="m-lid"></div><div class="field"><label>Dias para devolucao</label><input type="number" id="m-dias" value="14"></div>';
+            else fields.innerHTML = '<div class="field"><label>Nome</label><input id="m-nome"></div>';
+            m.classList.add('show');
+        }
+
+        function fecharModal() { document.getElementById('modal').classList.remove('show'); }
+
+        async function salvarModal() {
+            let body, url = getBase() + '/' + modalType;
+            if (modalType === 'livro') body = { nome: document.getElementById('m-nome').value, descricao: document.getElementById('m-desc').value, isbn: document.getElementById('m-isbn').value, numPaginas: parseInt(document.getElementById('m-pag').value), editoraId: parseInt(document.getElementById('m-ed').value), generoId: parseInt(document.getElementById('m-gen').value), idiomaId: parseInt(document.getElementById('m-idi').value), autoresId: document.getElementById('m-aut').value.split(',').map(s=>parseInt(s.trim())), status: document.getElementById('m-status').value };
+            else if (modalType === 'autor') body = { nome: document.getElementById('m-nome').value, detalhesAutor: { nacionalidade: document.getElementById('m-nac').value } };
+            else if (modalType === 'usuario') body = { nome: document.getElementById('m-nome').value, email: document.getElementById('m-email').value, telefone: document.getElementById('m-tel').value };
+            else if (modalType === 'emprestimo') { body = { usuarioId: parseInt(document.getElementById('m-uid').value), livroId: parseInt(document.getElementById('m-lid').value), diasParaDevolucao: parseInt(document.getElementById('m-dias').value) }; url = getBase() + '/emprestimo'; }
+            else body = { nome: document.getElementById('m-nome').value };
+            const res = await fetch(url, { method: 'POST', headers: headers(true), body: JSON.stringify(body) });
+            const data = await res.json();
+            if (res.ok || res.status === 201) { showMsg('Cadastrado com sucesso! ID: ' + data.id, true); fecharModal(); if(modalType==='livro') listarLivros(); else if(modalType==='emprestimo') listarEmprestimos(); else listarSimples(modalType); }
+            else showMsg(data.mensagem || data.erro || JSON.stringify(data), false);
+        }
+
+        // Init
+        if (apiKey) { document.getElementById('api-key-input').value = apiKey; document.getElementById('key-status').className = 'status on'; document.getElementById('key-status').textContent = 'X-API-Key ativa'; }
+        listarLivros();
     </script>
 </body>
 </html>
