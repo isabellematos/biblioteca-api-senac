@@ -91,7 +91,8 @@ public class GeneroController {
 		if (cached != null) {
 			@SuppressWarnings("unchecked")
 			EntityModel<GeneroDTO> cachedResource = (EntityModel<GeneroDTO>) cached;
-			return ResponseEntity.ok(cachedResource);
+			URI cachedUri = URI.create(cachedResource.getRequiredLink("self").getHref());
+			return ResponseEntity.created(cachedUri).body(cachedResource);
 		}
 
 		Genero genero = generoService.cadastrarGenero(g);

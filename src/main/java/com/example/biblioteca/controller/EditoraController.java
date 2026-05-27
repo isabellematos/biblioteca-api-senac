@@ -91,7 +91,8 @@ public class EditoraController {
 		if (cached != null) {
 			@SuppressWarnings("unchecked")
 			EntityModel<EditoraDTO> cachedResource = (EntityModel<EditoraDTO>) cached;
-			return ResponseEntity.ok(cachedResource);
+			URI cachedUri = URI.create(cachedResource.getRequiredLink("self").getHref());
+			return ResponseEntity.created(cachedUri).body(cachedResource);
 		}
 
 		Editora editora = editoraService.cadastrarEditora(e);

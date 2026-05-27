@@ -95,7 +95,8 @@ public class LivroController {
 		if (cached != null) {
 			@SuppressWarnings("unchecked")
 			EntityModel<LivroDTO> cachedResource = (EntityModel<LivroDTO>) cached;
-			return ResponseEntity.ok(cachedResource);
+			URI cachedUri = URI.create(cachedResource.getRequiredLink("self").getHref());
+			return ResponseEntity.created(cachedUri).body(cachedResource);
 		}
 
 		Livro livro = livroService.cadastrarLivro(l);

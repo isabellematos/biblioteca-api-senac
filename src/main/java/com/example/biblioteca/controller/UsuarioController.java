@@ -91,7 +91,8 @@ public class UsuarioController {
 		if (cached != null) {
 			@SuppressWarnings("unchecked")
 			EntityModel<UsuarioDTO> cachedResource = (EntityModel<UsuarioDTO>) cached;
-			return ResponseEntity.ok(cachedResource);
+			URI cachedUri = URI.create(cachedResource.getRequiredLink("self").getHref());
+			return ResponseEntity.created(cachedUri).body(cachedResource);
 		}
 
 		Usuario usuario = usuarioService.cadastrarUsuario(dto);
@@ -193,7 +194,8 @@ public class UsuarioController {
 		Usuario usuario = usuarioService.emprestarLivro(usuarioId, livroId);
 		EntityModel<UsuarioDTO> resource = EntityModel.of(new UsuarioDTO(usuario));
 		resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).retornarUsuarioId(usuarioId)).withSelfRel());
-		return ResponseEntity.ok(resource);
+		URI emprestimoUri = URI.create(resource.getRequiredLink("self").getHref());
+		return ResponseEntity.created(emprestimoUri).body(resource);
 	}
 
 	@Operation(summary = "Devolve um livro emprestado")

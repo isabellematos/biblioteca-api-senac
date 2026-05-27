@@ -73,7 +73,8 @@ public class EmprestimoController {
 		if (cached != null) {
 			@SuppressWarnings("unchecked")
 			EntityModel<EmprestimoDTO> cachedResource = (EntityModel<EmprestimoDTO>) cached;
-			return ResponseEntity.ok(cachedResource);
+			URI cachedUri = URI.create(cachedResource.getRequiredLink("self").getHref());
+			return ResponseEntity.created(cachedUri).body(cachedResource);
 		}
 
 		Emprestimo emprestimo = emprestimoService.realizarEmprestimo(dto);

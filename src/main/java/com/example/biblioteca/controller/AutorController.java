@@ -91,7 +91,8 @@ public class AutorController {
 		if (cached != null) {
 			@SuppressWarnings("unchecked")
 			EntityModel<AutorDTO> cachedResource = (EntityModel<AutorDTO>) cached;
-			return ResponseEntity.ok(cachedResource);
+			URI cachedUri = URI.create(cachedResource.getRequiredLink("self").getHref());
+			return ResponseEntity.created(cachedUri).body(cachedResource);
 		}
 
 		Autor autor = autorService.cadastrarAutor(a);

@@ -91,7 +91,8 @@ public class IdiomaController {
 		if (cached != null) {
 			@SuppressWarnings("unchecked")
 			EntityModel<IdiomaDTO> cachedResource = (EntityModel<IdiomaDTO>) cached;
-			return ResponseEntity.ok(cachedResource);
+			URI cachedUri = URI.create(cachedResource.getRequiredLink("self").getHref());
+			return ResponseEntity.created(cachedUri).body(cachedResource);
 		}
 
 		Idioma idioma = idiomaService.cadastrarIdioma(i);
